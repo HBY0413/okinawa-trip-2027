@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>沖繩自駕 7 天 6 夜｜2027/2/1–2/7</title>
+<style>
+  :root{
+    --sea:#0e7c86; --sea-d:#0a5a62; --sand:#f6efe3; --sun:#f2994a;
+    --ink:#1f2a30; --muted:#5f6b72; --line:#e3dccf; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+       color:var(--ink);background:var(--sand);line-height:1.65}
+  header{background:linear-gradient(135deg,var(--sea-d),var(--sea) 60%,#3fb6b2);color:#fff;padding:40px 20px 56px}
+  header .wrap{max-width:860px;margin:0 auto}
+  header h1{margin:0 0 6px;font-size:clamp(26px,6vw,40px);letter-spacing:.02em}
+  header p{margin:0;opacity:.9}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:999px;font-size:14px}
+  nav{position:sticky;top:0;z-index:10;background:rgba(246,239,227,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  nav .wrap{max-width:860px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px}
+  nav a{white-space:nowrap;text-decoration:none;color:var(--sea-d);font-weight:600;font-size:14px;padding:6px 10px;border-radius:8px}
+  nav a:hover{background:#e8f3f3}
+  main{max-width:860px;margin:-32px auto 40px;padding:0 14px}
+  section{background:var(--card);border-radius:16px;padding:22px 20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  h2{margin:0 0 14px;font-size:22px;color:var(--sea-d)}
+  h3{margin:0;font-size:18px}
+  .muted{color:var(--muted);font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:13px}
+  .day{border-left:4px solid var(--sea);padding-left:14px;margin:22px 0}
+  .day:first-of-type{margin-top:0}
+  .day-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:8px}
+  .badge{background:var(--sea);color:#fff;font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px}
+  .stay{font-size:13px;color:var(--sea-d);background:#e8f3f3;padding:2px 10px;border-radius:999px}
+  .stops{list-style:none;margin:0;padding:0}
+  .stops li{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .stops li:last-child{border-bottom:none}
+  .time{flex:0 0 58px;font-weight:700;color:var(--sun);font-size:14px;padding-top:2px}
+  .stop-body{flex:1;min-width:0}
+  .stop-name{font-weight:700}
+  .stop-note{color:var(--muted);font-size:14px;margin-top:2px}
+  .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .btn{display:inline-flex;align-items:center;gap:4px;font-size:13px;text-decoration:none;color:var(--sea-d);
+       border:1px solid #b9dcdc;background:#f3fafa;padding:3px 10px;border-radius:999px}
+  .btn:hover{background:#e0f1f1}
+  .btn.photo{color:#a3521a;border-color:#f3c9a4;background:#fff6ee}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card h3{font-size:16px;margin-bottom:4px}
+  .tag{display:inline-block;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:4px}
+  .must{counter-reset:m;list-style:none;padding:0;margin:0}
+  .must li{counter-increment:m;padding:8px 0 8px 38px;position:relative;border-bottom:1px solid var(--line)}
+  .must li::before{content:counter(m);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:50%;
+       background:var(--sun);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .tips li{margin-bottom:6px}
+  .note{background:#fff6ee;border:1px solid #f3c9a4;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:12px}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 20px 40px}
+  @media (max-width:520px){
+    th:nth-child(4),td:nth-child(4){display:none}
+    .time{flex-basis:48px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>🌊 沖繩自駕 7 天 6 夜</h1>
+    <p>那霸 → 南城 → 名護 → 北谷 → 那霸</p>
+    <div class="chips">
+      <span class="chip">📅 2027/2/1（一）– 2/7（日）</span>
+      <span class="chip">👥 3 人</span>
+      <span class="chip">🚗 租車 2/2 早上 – 2/6 傍晚</span>
+      <span class="chip">✈️ 去程 樂桃 MM922 09:45→12:25・回程 2/7 08:15</span>
+    </div>
+  </div>
+</header>
+
+<nav><div class="wrap">
+  <a href="#stay">住宿</a><a href="#days">每日行程</a><a href="#must">必去景點</a>
+  <a href="#shop">購物</a><a href="#onsen">溫泉</a><a href="#tips">注意事項</a>
+</div></nav>
+
+<main>
+
+<section id="stay">
+  <h2>🏨 住宿安排</h2>
+  <table>
+    <thead><tr><th>晚</th><th>地點</th><th>飯店</th><th>預算（三人一間）</th></tr></thead>
+    <tbody>
+      <tr><td>2/1</td><td>那霸</td><td><b>LACER OKINAWA NAHA MIEBASHI</b><div class="btns" data-q="LACER OKINAWA NAHA MIEBASHI 那覇"></div></td><td>≤ NT$10,500</td></tr>
+      <tr><td>2/2–2/3</td><td>名護</td><td><b>Hotel Sakurano Familia Nago</b><div class="btns" data-q="ホテルさくらのファミリア名護" data-pid="ChIJ434fVYFV5DQRjT-aS4lLCCE"></div></td><td>≤ NT$6,000</td></tr>
+      <tr><td>2/4–2/5</td><td>北谷</td><td><b>Monpa Chatan Beachside</b><br><span class="muted">備選：Sunset Beach Hotel</span><div class="btns" data-q="Monpa Chatan Beachside Condominium Hotel" data-pid="ChIJfYLUqhoT5TQRlPrsjEaoFk0"></div><div class="btns" data-q="Sunset Beach Hotel Chatan" data-pid="ChIJF1m_ABAT5TQRjIWeFd2nmv0" data-label="備選"></div></td><td>≤ NT$6,000</td></tr>
+      <tr><td>2/6</td><td>那霸</td><td><b>Hyatt Regency Naha</b><br><span class="muted">備選：Hotel Palm Royal 国際通り</span><div class="btns" data-q="Hyatt Regency Naha Okinawa" data-pid="ChIJoZxnnXpp5TQRGrM2_2O0c3M"></div><div class="btns" data-q="Hotel Palm Royal Resort Kokusai Street" data-pid="ChIJZRVZ5Xpp5TQR_dEQE5ejr8I" data-label="備選"></div></td><td>≤ NT$10,500</td></tr>
+    </tbody>
+  </table>
+  <div class="note">訂房時請確認：<b>3 張床</b>（不是 2 床＋加床）、名護和北谷選<b>海景房</b>、停車費。LACER 為自助入住，晚到沒問題，但沒有溫泉和海景。</div>
+</section>
+
+<section id="days">
+  <h2>🗺️ 每日行程</h2>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D1</span><h3>2/1（一）抵達那霸</h3><span class="stay">住：那霸 LACER</span></div>
+    <ul class="stops">
+      <li><div class="time">12:25</div><div class="stop-body"><div class="stop-name">抵達那霸機場 → 單軌電車到美榮橋站</div><div class="stop-note">今天不取車。入境後搭單軌電車約 14 分鐘，走 6 分鐘到飯店。入住 15:00，可先詢問能否寄放行李。</div><div class="btns" data-q="LACER OKINAWA NAHA MIEBASHI 那覇"></div></div></li>
+      <li><div class="time">14:30</div><div class="stop-body"><div class="stop-name">首里城</div><div class="stop-note">搭單軌電車到首里站，再走約 15 分鐘。正殿重建中，可以參觀修復工程。</div><div class="btns" data-q="首里城公園"></div></div></li>
+      <li><div class="time">18:30</div><div class="stop-body"><div class="stop-name">晚餐：海渡 KAITO 国際通り</div><div class="stop-note">沖繩料理居酒屋，Google 評分 4.9，18:00–24:00（週三公休）。推薦海葡萄、苦瓜炒蛋、和牛串。</div><div class="btns" data-q="海渡 KAITO OKINAWA 国際通り" data-pid="ChIJgchlrG1p5TQRsjzGvZxJIy8"></div>
+        <div class="stop-note" style="margin-top:6px">備選：Angama 国際通り店（有沖繩音樂現場表演）</div><div class="btns" data-q="Angama Kokusai-dori Street" data-pid="ChIJV1QDip1p5TQRxY03mjiHVp4" data-label="備選"></div></div></li>
+      <li><div class="time">20:30</div><div class="stop-body"><div class="stop-name">逛國際通＋MaxValu 牧志店</div><div class="stop-note">24 小時營業、可退稅。買零食飲料和隔天早餐，先看伴手禮價格（最後一天再買）。</div><div class="btns" data-q="MaxValu 牧志店" data-pid="ChIJM0zcXHtp5TQRiSYflTFDKyA"></div></div></li>
+    </ul>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D2</span><h3>2/2（二）取車・南城 → 名護</h3><span class="stay">住：名護 Sakurano Familia</span></div>
+    <ul class="stops">
+      <li><div class="time">8:30</div><div class="stop-body"><div class="stop-name">取車</div><div class="stop-note">回機場附近營業所取車，或選在那霸市區有營業所的租車公司。</div></div></li>
+      <li><div class="time">10:00</div><div class="stop-body"><div class="stop-name">齋場御嶽（＋知念岬）</div><div class="stop-note">琉球王國最神聖的地方，世界遺產，約 1 小時。旁邊的知念岬可以順便看太平洋。</div><div class="btns" data-q="斎場御嶽"></div></div></li>
+      <li><div class="time">12:00</div><div class="stop-body"><div class="stop-name">奧武島天婦羅 或 Yuinchi 猿人の湯</div><div class="stop-note">二選一。猿人の湯是九州・沖繩溫泉排行榜第 1 名，純泡湯約 2,000–2,200 日圓（營業 6:30–23:00）。</div><div class="btns" data-q="奥武島 天ぷら"></div><div class="btns" data-q="ユインチホテル南城 猿人の湯" data-pid="ChIJk9UegFZu5TQRUf7Gz8JA6WY" data-label="溫泉"></div></div></li>
+      <li><div class="time">17:00</div><div class="stop-body"><div class="stop-name">名護入住・看夕陽・San-A 採買</div><div class="stop-note">從南城上高速往北約 1 小時 20 分鐘。</div><div class="btns" data-q="サンエー 東江 名護" data-pid="ChIJc8O4co9V5DQR_79FjkD_oqQ"></div></div></li>
+    </ul>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D3</span><h3>2/3（三）美麗海・古宇利島</h3><span class="stay">住：名護 Sakurano Familia</span></div>
+    <ul class="stops">
+      <li><div class="time">9:00</div><div class="stop-body"><div class="stop-name">美麗海水族館</div><div class="stop-note">「黑潮之海」大水槽有鯨鯊，至少留 3 小時，早點到人比較少。</div><div class="btns" data-q="沖縄美ら海水族館"></div></div></li>
+      <li><div class="time">13:00</div><div class="stop-body"><div class="stop-name">備瀨福木林道</div><div class="stop-note">就在水族館旁邊，綠色隧道散步。</div><div class="btns" data-q="備瀬のフクギ並木"></div></div></li>
+      <li><div class="time">16:00</div><div class="stop-body"><div class="stop-name">古宇利島</div><div class="stop-note">開車跨越古宇利大橋，看心形岩和夕陽。</div><div class="btns" data-q="古宇利大橋"></div><div class="btns" data-q="ハートロック 古宇利島" data-label="心形岩"></div></div></li>
+    </ul>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D4</span><h3>2/4（四）名護 → 北谷</h3><span class="stay">住：北谷 Monpa</span></div>
+    <ul class="stops">
+      <li><div class="time">10:00</div><div class="stop-body"><div class="stop-name">Orion 啤酒工廠（オリオンハッピーパーク）</div><div class="stop-note">參觀需事先預約。</div><div class="btns" data-q="オリオンハッピーパーク"></div></div></li>
+      <li><div class="time">12:00</div><div class="stop-body"><div class="stop-name">部瀨名海中公園</div><div class="stop-note">玻璃船、海中展望塔，不用下水也能看魚。</div><div class="btns" data-q="ブセナ海中公園"></div></div></li>
+      <li><div class="time">15:00</div><div class="stop-body"><div class="stop-name">萬座毛</div><div class="stop-note">像大象鼻子的海崖。</div><div class="btns" data-q="万座毛"></div></div></li>
+      <li><div class="time">17:30</div><div class="stop-body"><div class="stop-name">北谷美國村看夕陽・晚餐</div><div class="stop-note">入住北谷，吃飯逛街都走路可到。</div><div class="btns" data-q="美浜アメリカンビレッジ"></div></div></li>
+    </ul>
+    <div class="note">想去 JUNGLIA 樂園的話，可以換掉 Orion 和部瀨名（JUNGLIA 要玩大半天，門票先上網預約）。</div>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D5</span><h3>2/5（五）讀谷一日遊</h3><span class="stay">住：北谷 Monpa</span></div>
+    <ul class="stops">
+      <li><div class="time">10:00</div><div class="stop-body"><div class="stop-name">殘波岬</div><div class="stop-note">白色燈塔與斷崖海景。</div><div class="btns" data-q="残波岬"></div></div></li>
+      <li><div class="time">12:00</div><div class="stop-body"><div class="stop-name">讀谷陶藝村（やちむんの里）</div><div class="stop-note">買沖繩陶器。</div><div class="btns" data-q="やちむんの里 読谷"></div></div></li>
+      <li><div class="time">14:30</div><div class="stop-body"><div class="stop-name">座喜味城跡</div><div class="stop-note">世界遺產，曲線城牆很漂亮。</div><div class="btns" data-q="座喜味城跡"></div></div></li>
+      <li><div class="time">17:30</div><div class="stop-body"><div class="stop-name">北谷 Sunset Beach</div><div class="stop-note">海邊散步、美國村晚餐。</div><div class="btns" data-q="サンセットビーチ 北谷"></div></div></li>
+    </ul>
+    <div class="note">下雨備案：把殘波岬換成 AEON MALL 沖繩來客夢（離北谷約 15 分鐘）。</div>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D6</span><h3>2/6（六）北谷 → 那霸・買伴手禮</h3><span class="stay">住：那霸 Hyatt Regency</span></div>
+    <ul class="stops">
+      <li><div class="time">10:30</div><div class="stop-body"><div class="stop-name">瀨長島海風露台（ウミカジテラス）</div><div class="stop-note">機場旁的白色海邊商店街，看飛機起降、吃午餐。</div><div class="btns" data-q="瀬長島ウミカジテラス"></div></div></li>
+      <li><div class="time">13:30</div><div class="stop-body"><div class="stop-name">國際通・牧志公設市場</div><div class="stop-note">買伴手禮。市場可以買海鮮請樓上代煮。</div><div class="btns" data-q="第一牧志公設市場"></div></div></li>
+      <li><div class="time">17:00</div><div class="stop-body"><div class="stop-name">還車</div><div class="stop-note">加滿油再還。</div></div></li>
+      <li><div class="time">18:00</div><div class="stop-body"><div class="stop-name">入住那霸飯店・國際通晚餐</div><div class="stop-note">晚上再去超市把伴手禮補齊。</div></div></li>
+    </ul>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="badge">D7</span><h3>2/7（日）回程</h3></div>
+    <ul class="stops">
+      <li><div class="time">6:00</div><div class="stop-body"><div class="stop-name">出發到那霸機場（08:15 起飛）</div><div class="stop-note">樂桃是廉航，報到櫃台通常在起飛前 50 分鐘就關閉，最晚 6:30 要到機場。可以搭首班單軌電車（約 6:00 發車，請再確認時刻表）或叫計程車（約 15 分鐘）。行李重量規定嚴格，前一晚先秤好。伴手禮請在 D6 買齊。</div></div></li>
+    </ul>
+  </div>
+</section>
+
+<section id="must">
+  <h2>⭐ 一定要去</h2>
+  <ol class="must">
+    <li><b>美麗海水族館</b>（D3）：鯨鯊、鬼蝠魟大水槽</li>
+    <li><b>古宇利島</b>（D3）：開車跨海大橋，翡翠綠的海</li>
+    <li><b>萬座毛</b>（D4）：象鼻海崖</li>
+    <li><b>北谷美國村</b>（D4–5）：吃飯、逛街、夕陽</li>
+    <li><b>國際通・牧志市場</b>（D1、D6）：伴手禮集中地</li>
+    <li><b>首里城</b>（D1）：琉球王國的王城，世界遺產</li>
+    <li><b>齋場御嶽</b>（D2）：世界遺產，琉球最神聖的地方</li>
+    <li><b>知念岬公園</b>（D2）：免費的太平洋海景</li>
+  </ol>
+  <p class="muted">時間不夠可先刪：備瀨福木林道、Orion 啤酒工廠、殘波岬、陶藝村、座喜味城。</p>
+</section>
+
+<section id="shop">
+  <h2>🛒 超市與購物</h2>
+  <div class="grid">
+    <div class="card"><span class="tag">那霸</span><h3>MaxValu 牧志店</h3><div class="muted">國際通旁，24 小時，可退稅，零食伴手禮多</div><div class="btns" data-q="MaxValu 牧志店" data-pid="ChIJM0zcXHtp5TQRiSYflTFDKyA"></div></div>
+    <div class="card"><span class="tag">那霸</span><h3>Tsuji Super（辻スーパー）</h3><div class="muted">沖繩第一家 24 小時超市，熟食很有特色，只收現金</div><div class="btns" data-q="辻スーパー 那覇" data-pid="ChIJtzMOZZpp5TQRfUNK92K_G_M"></div></div>
+    <div class="card"><span class="tag">名護</span><h3>San-A 東江</h3><div class="muted">離 Sakurano Familia 最近，超市＋藥妝＋大創</div><div class="btns" data-q="サンエー 東江" data-pid="ChIJc8O4co9V5DQR_79FjkD_oqQ"></div></div>
+    <div class="card"><span class="tag">名護</span><h3>AEON 名護</h3><div class="muted">8:00–23:00，超市＋大創</div><div class="btns" data-q="イオン名護店" data-pid="ChIJG1MS9PtV5DQRWRDTmYFzAko"></div></div>
+    <div class="card"><span class="tag">名護</span><h3>MEGA 唐吉訶德 名護</h3><div class="muted">營業到凌晨 2 點</div><div class="btns" data-q="MEGAドン・キホーテ名護店" data-pid="ChIJv5jYhPlV5DQRSNV-E1YhtHQ"></div></div>
+    <div class="card"><span class="tag">北谷</span><h3>美國村</h3><div class="muted">商店、餐廳、海邊夕陽一次滿足</div><div class="btns" data-q="美浜アメリカンビレッジ"></div></div>
+  </div>
+  <div class="note"><b>伴手禮清單：</b>紅芋塔（御菓子御殿）、金楚糕、雪鹽餅乾、黑糖、Orion 周邊。同款零食超市通常比國際通便宜，D1 先比價，D6 再買。退稅記得帶護照。</div>
+</section>
+
+<section id="onsen">
+  <h2>♨️ 溫泉（可單買票）</h2>
+  <div class="grid">
+    <div class="card"><span class="tag">南城</span><h3>Yuinchi 猿人の湯</h3><div class="muted">源泉直流、九州・沖繩排行第 1。約 2,000–2,200 日圓，6:30–23:00，有包租湯</div><div class="btns" data-q="ユインチホテル南城 猿人の湯" data-pid="ChIJk9UegFZu5TQRUf7Gz8JA6WY"></div></div>
+    <div class="card"><span class="tag">瀨長島</span><h3>琉球温泉 龍神の湯</h3><div class="muted">海景露天浴池、看飛機起降。2,000 日圓，6:00–24:00</div><div class="btns" data-q="琉球温泉 龍神の湯 瀬長島"></div></div>
+    <div class="card"><span class="tag">今歸仁</span><h3>SPA JUNGLIA</h3><div class="muted">金氏世界紀錄最大無邊際浴池。2,640 日圓，13:00–20:00</div><div class="btns" data-q="SPA JUNGLIA ジャングリア"></div></div>
+  </div>
+</section>
+
+<section id="tips">
+  <h2>📝 注意事項</h2>
+  <ul class="tips">
+    <li><b>2 月天氣：</b>大約 15–20°C，海風大，帶件防風外套；海水偏冷，以看海為主、不適合下水。</li>
+    <li><b>2 月限定：</b>名護一帶常在 1 月底到 2 月初有櫻花祭，1–3 月也是賞鯨季，出發前可以查當年日期。</li>
+    <li><b>租車：</b>2/2 早上取車到 2/6 傍晚還車，共 5 天。日本靠左行駛，晚上鄉間道路很暗，開慢一點。</li>
+    <li><b>停車：</b>名護、北谷飯店多數有停車場但車位有限；那霸市區停車通常要收費。</li>
+    <li><b>Costco：</b>南城有 Costco，台灣的會員卡在日本也能用。</li>
+    <li><b>單軌電車：</b>各站都有電梯，行李箱可以帶上車。</li>
+    <li><b>價格：</b>頁面上的價格與營業時間是 2026 年 11 月查到的資料，以官方最新公告為準。</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>沖繩自駕行程・2027 年 2 月</footer>
+
+<script>
+  // 每個 .btns 依 data-q / data-pid 產生「看照片」「地圖」按鈕（開啟 Google Maps 店家頁，可看照片與評論）
+  document.querySelectorAll('.btns').forEach(function (el) {
+    var q = el.dataset.q, pid = el.dataset.pid, label = el.dataset.label;
+    var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) +
+              (pid ? '&query_place_id=' + encodeURIComponent(pid) : '');
+    var prefix = label ? label + '：' : '';
+    el.innerHTML =
+      '<a class="btn photo" target="_blank" rel="noopener" href="' + url + '">📷 ' + prefix + '看照片</a>' +
+      '<a class="btn" target="_blank" rel="noopener" href="' + url + '">📍 地圖</a>';
+  });
+</script>
+</body>
+</html>
