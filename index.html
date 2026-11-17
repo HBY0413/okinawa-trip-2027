@@ -952,6 +952,18 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     var lp2=ctx.createBiquadFilter();lp2.type='lowpass';lp2.frequency.value=900;dl.connect(lp2);lp2.connect(fb);fb.connect(dl);lp2.connect(wet);wet.connect(ctx.destination);
     ctx._bus=ctx.createGain();ctx._bus.connect(fx);ctx._bus.connect(dl);
     ctx._d=0;
+    // 燕鷗（沖繩常見的紅燕鷗、黑枕燕鷗）：沙啞的「キィーアッ」「キッキッ」叫聲，從左右遠近隨機傳來
+    var birdBus=ctx.createGain();birdBus.gain.value=.5;birdBus.connect(uw);
+    ctx._tern=function(){var n=1+Math.floor(Math.random()*4),t=ctx.currentTime+.05,pan=Math.random()*1.6-.8,far=.35+Math.random()*.65,kind=Math.random();
+      var P=ctx.createStereoPanner?ctx.createStereoPanner():null;var out=ctx.createGain();out.gain.value=far;if(P){P.pan.value=pan;out.connect(P);P.connect(birdBus);}else out.connect(birdBus);
+      for(var i=0;i<n;i++){var long=kind<.55&&i===0,dur=long?.26+Math.random()*.12:.07+Math.random()*.05,f0=(long?3300:3800)+Math.random()*600,f1=long?1900+Math.random()*300:3000+Math.random()*400;
+        var o=ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(f0*.92,t);o.frequency.linearRampToValueAtTime(f0,t+dur*.18);o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+        var am=ctx.createOscillator(),amG=ctx.createGain();am.frequency.value=70+Math.random()*60;amG.gain.value=.45;am.connect(amG);   // 沙啞感
+        var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f0*.85;bp.Q.value=3.5;var hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=1200;
+        var g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.32,t+.012);g.gain.setValueAtTime(.32,t+dur*.6);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+        var vg=ctx.createGain();vg.gain.value=.55;amG.connect(vg.gain);
+        o.connect(bp);bp.connect(hp);hp.connect(vg);vg.connect(g);g.connect(out);o.start(t);am.start(t);o.stop(t+dur+.02);am.stop(t+dur+.02);
+        t+=dur+(long?.12+Math.random()*.15:.06+Math.random()*.09);}};
     ctx._depth=function(d){ctx._d=d;var k=Math.max(0,Math.min(1,(d-.04)/.12));var n=ctx.currentTime;var deep=Math.max(0,(d-.1)/.9);
       uw.frequency.setTargetAtTime(18000*Math.pow(300/18000,k),n,.3);uwGain.gain.setTargetAtTime(Math.pow(1-k,1.6),n,.35);   // 海浪聲：海面清楚 → 水中聽不到
       ambG.gain.setTargetAtTime(k*(.10+.22*deep),n,.6);ambF.frequency.setTargetAtTime(200-110*deep,n,.6);
@@ -986,11 +998,13 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   }
   // 給下潛效果用：深度改變水中悶聲、往下捲時咕嚕咕嚕
   var lastGlug=0;
-  window.SND={isOn:function(){return on&&!!ctx},depth:function(d){if(on&&ctx&&ctx._depth)ctx._depth(d);},
+  window.SND={tern:function(){if(ctx&&ctx._tern)ctx._tern();},isOn:function(){return on&&!!ctx},depth:function(d){if(on&&ctx&&ctx._depth)ctx._depth(d);},
     glug:function(speed){if(!on||!ctx||!ctx._blub)return;var now=ctx.currentTime;   // speed：每秒捲動幾 px
       var deep=Math.max(0,(ctx._d-.1)/.9),gap=Math.max(.05,.55-speed/2200);if(now-lastGlug<gap)return;lastGlug=now;
       var n=1+Math.min(6,Math.floor(speed/450)+(Math.random()<.5?1:0)),sp=Math.max(.028,.17-speed/9000)*(1+.8*deep),t=now+.01;
       for(var i=0;i<n;i++){ctx._blub(t,Math.random());t+=sp*(.6+Math.random()*.8);}}};
+  // 在海面時偶爾傳來燕鷗叫聲（潛到水裡就聽不到）
+  (function gull(){setTimeout(function(){if(on&&ctx&&ctx._tern&&ctx._d<.05&&!document.hidden){ctx._tern();if(Math.random()<.3)setTimeout(function(){if(on&&ctx._d<.05)ctx._tern();},600+Math.random()*1500);}gull();},9000+Math.random()*16000);})();
   // 在水中時偶爾自己冒幾顆泡泡聲
   (function idle(){setTimeout(function(){if(on&&ctx&&ctx._blub&&ctx._d>.12&&!document.hidden){var t=ctx.currentTime+.02,n=1+Math.floor(Math.random()*3);for(var i=0;i<n;i++){ctx._blub(t,Math.random()*.6);t+=.08+Math.random()*.2;}}idle();},2500+Math.random()*5000);})();
   var userOff=false;
