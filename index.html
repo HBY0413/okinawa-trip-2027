@@ -258,7 +258,7 @@
   header .chips{justify-content:center}
   @media (max-width:600px){
     nav:not(.rail){padding:6px 8px 0}
-    nav:not(.rail) .wrap{padding:4px 6px;border-radius:12px}
+    nav:not(.rail) .wrap{padding:4px 6px;border-radius:999px}
     header h1{padding:0 44px}
   }
 
@@ -288,7 +288,8 @@
   header .chip{background:rgba(51,51,51,.45);border-color:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff}
 
   /* 海浪聲開關：放在固定的導覽列左側，捲到哪裡都能開關 */
-  nav:not(.rail) .wrap{position:relative}
+  nav:not(.rail) .wrap{position:relative;border-radius:999px!important}
+  nav:not(.rail) .wrap a{border-radius:999px}
   nav:not(.rail) .wrap .hdr-snd{position:absolute;left:10px;right:auto;top:50%;transform:translateY(-50%);margin:0!important;
     padding:6px 12px;font-size:14px;line-height:1.2;z-index:2}
   @media (max-width:900px){
