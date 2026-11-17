@@ -535,9 +535,50 @@
   /* 主標題放大 */
   header h1{font-size:clamp(34px,8.5vw,64px)!important;line-height:1.15;margin-bottom:12px!important;letter-spacing:.04em}
   @media (max-width:600px){header h1{font-size:clamp(24px,7.4vw,40px)!important;padding:0 4px!important;white-space:nowrap;letter-spacing:.01em}}
+
+  /* ===== 開場頁 ===== */
+  html.intro-open,html.intro-open body{overflow:hidden}
+  #intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;
+    background:linear-gradient(180deg,#3b7fa8 0%,#2f6f98 55%,#285f88 100%);transition:opacity .9s ease,visibility .9s}
+  #intro.hide{opacity:0;visibility:hidden;pointer-events:none}
+  #introCv{position:absolute;inset:0;width:100%;height:100%}
+  .intro-in{position:relative;padding:24px;max-width:860px;transform:translateY(0);transition:transform .9s ease}
+  #intro.hide .intro-in{transform:translateY(-24px)}
+  .intro-kicker{margin:0 0 18px;font-size:14px;font-weight:300;letter-spacing:.3em;color:rgba(248,244,230,.8)}
+  #intro h1{margin:0 0 28px;font-family:'Zen Maru Gothic','Huninn',sans-serif;font-weight:700;font-size:clamp(44px,13vw,112px);line-height:1.1;letter-spacing:.06em;
+    color:#fff;text-shadow:0 4px 24px rgba(0,30,60,.35)}
+  .intro-q{margin:0 0 26px;font-size:16px;line-height:1.8;color:rgba(255,255,255,.92)}
+  .intro-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .intro-btn{font:inherit;font-size:16px;font-weight:600;padding:12px 28px;border-radius:999px;cursor:pointer;color:#fff;
+    background:rgba(51,51,51,.45);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s,background .2s}
+  .intro-btn.on{background:var(--sun,#e8a04c);border-color:transparent;color:#fff}
+  .intro-btn:hover{transform:translateY(-2px)}
+  .intro-btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .intro-note{margin:22px 0 0;font-size:14px;font-weight:300;color:rgba(255,255,255,.7)}
+  @media (prefers-reduced-motion:reduce){#intro,.intro-in{transition:none}}
+
+  /* 桌機：導引列上緣對齊班次表上緣，捲動後停在導覽列下方 */
+  @media (min-width:901px){nav.rail{top:var(--railTop,50%)!important;transform:none!important}}
+
+  #intro h1 span{display:block;white-space:nowrap}
+  .intro-wave{font-size:clamp(36px,6vw,64px);line-height:1;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(0,30,60,.3))}
 </style>
 </head>
 <body>
+<div id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <canvas id="introCv" aria-hidden="true"></canvas>
+  <div class="intro-in">
+    <p class="intro-kicker">2027.2.1 — 2.7　那霸・山原・北谷</p>
+    <div class="intro-wave" aria-hidden="true">🌊</div>
+    <h1 id="introTitle"><span>沖縄ドライブ</span><span>7日間</span></h1>
+    <p class="intro-q">這個網站有海浪、燕鷗與水中的聲音<br>要開啟聲音嗎？</p>
+    <div class="intro-btns">
+      <button type="button" class="intro-btn on" data-snd="1">🔊 開聲音進入</button>
+      <button type="button" class="intro-btn" data-snd="0">🔈 靜音進入</button>
+    </div>
+    <p class="intro-note">之後可以隨時用導覽列左邊的「海浪聲」開關</p>
+  </div>
+</div>
 <div id="bgphoto" aria-hidden="true"></div>
 <canvas id="ocean" aria-hidden="true"></canvas>
 <canvas id="under" aria-hidden="true"></canvas>
@@ -1048,10 +1089,11 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   (function idle(){setTimeout(function(){if(on&&ctx&&ctx._blub&&ctx._d>.12&&!document.hidden){var t=ctx.currentTime+.02,n=1+Math.floor(Math.random()*3);for(var i=0;i<n;i++){ctx._blub(t,Math.random()*.6);t+=.08+Math.random()*.2;}}idle();},2500+Math.random()*5000);})();
   var userOff=false;
   function manual(){toggle();userOff=!on;}
+  window.SND.enable=function(){userOff=false;if(!on)toggle();};window.SND.disable=function(){userOff=true;if(on)toggle();};
   btn2.addEventListener('click',manual);
   // 瀏覽器不允許一打開就自動播放：在你第一次點擊／觸碰頁面任何地方時自動開始海浪聲（按按鈕關掉後就不會再自動開）
   function autoStart(e){
-    if(e.target&&e.target.closest&&e.target.closest('#soundBtn,#soundBtn2'))return;
+    if(e.target&&e.target.closest&&e.target.closest('#soundBtn,#soundBtn2,#intro'))return;
     document.removeEventListener('pointerdown',autoStart,true);document.removeEventListener('keydown',autoStart,true);
     if(!on&&!userOff)toggle();
   }
@@ -1297,6 +1339,49 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     var z=d<.10?0:Math.round(Math.pow((d-.10)/.90,1.15)*MAXD);dp.innerHTML=z===0?'<small>海面</small>0 m':'<small>水深</small>'+z+' m';
     dp.style.background=z===0?'rgba(51,166,184,.9)':'rgba('+Math.round(39-17*d)+','+Math.round(110-74*d)+','+Math.round(150-80*d)+',.9)';}
   place();upd();addEventListener('resize',place);addEventListener('scroll',upd,{passive:true});if(document.fonts)document.fonts.ready.then(place);
+})();
+</script>
+<script>
+// ===== 開場頁：和風水中花紋（青海波、流水紋、金砂子，不放泡泡）＋選擇是否開聲音 =====
+(function(){
+  var el=document.getElementById('intro');if(!el)return;document.documentElement.classList.add('intro-open');
+  var cv=document.getElementById('introCv'),x=cv.getContext('2d'),W,H,S,gold=[],run=true;
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var seig=(function(){var r=30,g=document.createElement('canvas');g.width=r*2;g.height=r;var c=g.getContext('2d');c.strokeStyle='rgba(255,255,255,1)';c.lineWidth=1.3;
+    function fan(cx,cy){for(var k=1;k<=4;k++){c.beginPath();c.arc(cx,cy,r*k/4,Math.PI,0);c.stroke();}}fan(0,r);fan(r*2,r);fan(r,r*1.5);fan(r,r*.5);fan(-r,r*.5);fan(r*3,r*.5);return g;})();
+  function size(){S=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*S;cv.height=H*S;x.setTransform(S,0,0,S,0,0);
+    gold=[];for(var i=0;i<(W<700?40:90);i++)gold.push({x:Math.random()*W,y:Math.random()*H,r:.8+Math.random()*1.8,p:Math.random()*6.28});}
+  size();addEventListener('resize',size);
+  function draw(ts){var t=ts/1000;x.clearRect(0,0,W,H);
+    // 青海波
+    x.save();x.globalAlpha=.12;x.fillStyle=x.createPattern(seig,'repeat');x.translate((t*5)%60,0);x.fillRect(-60,0,W+120,H);x.restore();
+    // 微微的光帶
+    for(var r=0;r<5;r++){var cx=W*(.1+r*.21)+Math.sin(t*.2+r*1.9)*W*.015;var lg=x.createLinearGradient(0,0,0,H*.9);lg.addColorStop(0,'rgba(248,244,230,.07)');lg.addColorStop(1,'rgba(248,244,230,0)');
+      x.fillStyle=lg;x.beginPath();x.moveTo(cx-W*.015,0);x.lineTo(cx+W*.015,0);x.lineTo(cx+W*.1+W*.05,H*.9);x.lineTo(cx+W*.1-W*.05,H*.9);x.closePath();x.fill();}
+    // 流水紋＋觀世水小渦
+    x.lineCap='round';
+    for(var s2=0;s2<6;s2++){var yy=H*(.12+s2*.16),amp=8+s2%3*5,ph=t*(.3+s2*.04)+s2*2.1;x.strokeStyle='rgba(248,244,230,'+(.2-.015*s2).toFixed(3)+')';x.lineWidth=s2%2?1:1.6;x.beginPath();
+      for(var px=-20;px<=W+20;px+=10){var vy=yy+Math.sin(px*.008+ph)*amp+Math.sin(px*.02-ph*.6)*amp*.3;px===-20?x.moveTo(px,vy):x.lineTo(px,vy);}x.stroke();
+      var ex=W*(.15+((s2*37)%70)/100),ey=yy+Math.sin(ex*.008+ph)*amp;x.beginPath();for(var a=0;a<9.5;a+=.25){var rr=2+a*1.7;x.lineTo(ex+Math.cos(a+ph)*rr,ey+Math.sin(a+ph)*rr*.6);}x.stroke();}
+    // 金砂子
+    for(var j=0;j<gold.length;j++){var G=gold[j];x.fillStyle='rgba(210,175,90,'+(.45+.3*Math.sin(t*1.1+G.p)).toFixed(2)+')';x.beginPath();x.arc(G.x+Math.sin(t*.4+G.p)*4,G.y,G.r,0,6.283);x.fill();}
+    if(run&&!reduce)requestAnimationFrame(draw);}
+  requestAnimationFrame(draw);
+  function enter(withSound){
+    try{if(withSound&&window.SND&&SND.enable)SND.enable();else if(window.SND&&SND.disable)SND.disable();}catch(e){}
+    window.scrollTo(0,0);el.classList.add('hide');document.documentElement.classList.remove('intro-open');
+    setTimeout(function(){run=false;el.parentNode&&el.parentNode.removeChild(el);},1000);}
+  el.querySelectorAll('.intro-btn').forEach(function(b){b.addEventListener('click',function(){enter(b.dataset.snd==='1');});});
+  setTimeout(function(){var b=el.querySelector('.intro-btn.on');b&&b.focus({preventScroll:true});},300);
+})();
+</script>
+<script>
+(function(){var rail=document.querySelector('nav.rail'),f=document.querySelector('header .fids');if(!rail||!f)return;
+  function pos(){if(innerWidth<=900){rail.style.removeProperty('--railTop');return;}
+    var nav=document.querySelector('nav:not(.rail) .wrap'),nb=nav?nav.getBoundingClientRect().bottom:60;
+    var minTop=nb<140?nb+16:16,t=Math.max(minTop,f.getBoundingClientRect().top);
+    var maxTop=innerHeight-rail.offsetHeight-70;t=Math.min(t,Math.max(minTop,maxTop));rail.style.setProperty('--railTop',t+'px');}
+  pos();addEventListener('scroll',pos,{passive:true});addEventListener('resize',pos);addEventListener('load',pos);if(document.fonts)document.fonts.ready.then(pos);
 })();
 </script>
 </body>
