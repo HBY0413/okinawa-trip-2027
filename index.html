@@ -7,6 +7,16 @@
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="vendor/fonts/zen-maru-gothic/700.css">
 <link rel="stylesheet" href="vendor/fonts/huninn/400.css">
+<script>
+// 開啟網頁一律從標題開始：不沿用上次捲動位置、不跳到網址上的 #錨點
+(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(e){}
+  if(location.hash){try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}}
+  function top(){window.scrollTo(0,0);}
+  top();document.addEventListener('DOMContentLoaded',top);
+  window.addEventListener('load',function(){top();setTimeout(top,60);});
+  window.addEventListener('pageshow',function(e){if(e.persisted)top();});
+})();
+</script>
 <style>
   :root{
     --sea:#0e7c86; --sea-d:#0a5a62; --sand:#f6efe3; --sun:#f2994a;
