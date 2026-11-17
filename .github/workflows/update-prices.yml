@@ -1,9 +1,7 @@
-name: 每週更新飯店房價（樂天旅遊）
+name: 手動更新飯店房價（樂天旅遊，備用）
 
 on:
-  schedule:
-    # 每週一 00:00（台北時間）＝ 週日 16:00 UTC
-    - cron: "0 16 * * 0"
+  # 已改為用使用者電腦上的 Chrome 每週六、日比價；這裡只保留手動執行（需先設定樂天 API 金鑰）。
   workflow_dispatch: {}
 
 permissions:
