@@ -396,13 +396,21 @@
 })();
 </script>
 <script>
+// ===== 海浪節奏：大小浪隨機（小浪多、偶爾一組大浪），畫面與聲音共用 =====
+window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
+  next:function(delay){var r=Math.random(),size;
+    if(this.setLeft>0){this.setLeft--;size=.85+Math.random()*.3;}          // 大浪組
+    else if(r<.08){this.setLeft=Math.floor(Math.random()*2);size=.9+Math.random()*.25;}
+    else if(r<.45){size=.55+Math.random()*.25;}                              // 中浪
+    else{size=.25+Math.random()*.25;}                                        // 小浪
+    this.cur={t0:performance.now()/1000+(delay||0),dur:4.5+size*4+Math.random()*1.5,size:size};return this.cur;}};
 // ===== 背景：Gemini 生成的沖繩海景照片（bg-okinawa.jpg）＋淡淡的動態浪花；照片載入失敗才改用程式繪製的海景 =====
 (function(){
   var c=document.getElementById('ocean'), x=c.getContext('2d');
   var W,H,dpr,t=0,last=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size(){dpr=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);}
   addEventListener('resize',size);size();
-  var cover=null,photoState='loading',img=new Image();img.onload=function(){photoState='ok';if(reduce)requestAnimationFrame(draw);};img.onerror=function(){photoState='fail';document.getElementById('bgphoto').style.display='none';if(reduce)requestAnimationFrame(draw);};img.src='bg-okinawa.jpg';
+  var spray=[],cover=null,photoState='loading',img=new Image();img.onload=function(){photoState='ok';if(reduce)requestAnimationFrame(draw);};img.onerror=function(){photoState='fail';document.getElementById('bgphoto').style.display='none';if(reduce)requestAnimationFrame(draw);};img.src='bg-okinawa.jpg';
   var glints=[];for(var i=0;i<90;i++)glints.push({x:Math.random(),y:Math.random(),p:Math.random()*6.28,s:.6+Math.random()*1.6});
   function island(cx,base,w,h,col){
     x.fillStyle=col;x.beginPath();x.moveTo(cx-w/2,base);
@@ -434,23 +442,39 @@
       glints.forEach(function(p){var y=hzY+(H-hzY)*(.06+p.y*.75),a=.5+.5*Math.sin(t*2.4+p.p);
         x.fillStyle='rgba(255,255,255,'+(a*.75).toFixed(2)+')';x.fillRect(((p.x*W+t*7*p.s)%W),y,2+p.s*2.4*((y-hzY)/(H-hzY)),1.2);});
       // 推進中的浪頭（白色浪花線）
-      function wy(L,i,px,base){return base+Math.sin(px/L.l*6.28+t*L.s+i)*L.a+Math.sin(px/(L.l*.43)*6.28-t*L.s*1.3)*L.a*.4;}
+      var gsz=.7+.6*window.WAVES.cur.size;
+      function wy(L,i,px,base){return base+Math.sin(px/L.l*6.28+t*L.s+i)*L.a*gsz+Math.sin(px/(L.l*.43)*6.28-t*L.s*1.3)*L.a*.4;}
       [{y:.70,a:4,l:300,s:.55,f:.05,k:.22,w:1.2},{y:.78,a:6,l:360,s:.7,f:.07,k:.32,w:1.8},{y:.86,a:8,l:420,s:.9,f:.09,k:.42,w:2.4},{y:.93,a:10,l:500,s:1.1,f:.12,k:.55,w:3}].forEach(function(L,i){
         var base=hzY+(H-hzY)*((L.y-.5)/.5);
         x.beginPath();x.moveTo(0,H);for(var px=0;px<=W+10;px+=8)x.lineTo(px,wy(L,i,px,base));x.lineTo(W,H);x.closePath();
         x.fillStyle='rgba(225,250,248,'+L.f+')';x.fill();
         x.beginPath();for(var qx=0;qx<=W+10;qx+=8){var qy=wy(L,i,qx,base);if(qx===0)x.moveTo(qx,qy);else x.lineTo(qx,qy);}
         x.shadowColor='rgba(255,255,255,.8)';x.shadowBlur=6;x.strokeStyle='rgba(255,255,255,'+L.k+')';x.lineWidth=L.w;x.stroke();x.shadowBlur=0;});
-      // 拍岸白浪：每 7 秒一次從下往上湧，再慢慢退去（開聲音時與浪聲同步）
-      var cyc=(window.__waveT!==undefined?(t-window.__waveT):(t%7))/ (window.__waveDur||7);
+      // 拍岸白浪：大小隨機，大浪會濺起浪花
+      var Wv=window.WAVES,cw=Wv.cur,cyc=(t-cw.t0)/cw.dur;
+      if(cyc>=1.15&&!Wv.audio){cw=Wv.next(.2+Math.random()*1.2);cyc=(t-cw.t0)/cw.dur;}
       if(cyc>=0&&cyc<1){
-        var push=cyc<.4?Math.sin(cyc/.4*Math.PI/2):Math.cos((cyc-.4)/.6*Math.PI/2);
-        var top=H-(H-hzY)*0.32*push, alpha=.55*push;
-        var gg=x.createLinearGradient(0,top-10,0,H);gg.addColorStop(0,'rgba(255,255,255,'+alpha.toFixed(2)+')');gg.addColorStop(.25,'rgba(240,253,252,'+(alpha*.5).toFixed(2)+')');gg.addColorStop(1,'rgba(220,248,246,'+(alpha*.25).toFixed(2)+')');
-        x.beginPath();x.moveTo(0,H);
-        for(var sx3=0;sx3<=W+10;sx3+=8){x.lineTo(sx3,top+Math.sin(sx3/90+t*2)*6+Math.sin(sx3/37-t*3)*3);}
-        x.lineTo(W,H);x.closePath();x.fillStyle=gg;x.fill();
+        var sz=cw.size, push=cyc<.38?Math.sin(cyc/.38*Math.PI/2):Math.cos((cyc-.38)/.62*Math.PI/2);
+        var reach=(H-hzY)*(.1+.36*sz), top=H-reach*push, alpha=(.35+.35*sz)*push;
+        function front(px){return top+Math.sin(px/90+t*2+cw.t0)*(4+6*sz)+Math.sin(px/37-t*3)*(2+3*sz)+Math.sin(px/230+cw.t0*3)*10*sz;}
+        var gg=x.createLinearGradient(0,top-12,0,H);
+        gg.addColorStop(0,'rgba(255,255,255,'+alpha.toFixed(2)+')');gg.addColorStop(.2,'rgba(240,253,252,'+(alpha*.55).toFixed(2)+')');gg.addColorStop(1,'rgba(220,248,246,'+(alpha*.2).toFixed(2)+')');
+        x.beginPath();x.moveTo(0,H);for(var sx3=0;sx3<=W+10;sx3+=8)x.lineTo(sx3,front(sx3));x.lineTo(W,H);x.closePath();x.fillStyle=gg;x.fill();
+        // 浪頭白邊
+        x.beginPath();for(var fx=0;fx<=W+10;fx+=8){if(fx===0)x.moveTo(fx,front(fx));else x.lineTo(fx,front(fx));}
+        x.strokeStyle='rgba(255,255,255,'+Math.min(.95,alpha*1.6).toFixed(2)+')';x.lineWidth=2+3*sz;x.shadowColor='#fff';x.shadowBlur=8+10*sz;x.stroke();x.shadowBlur=0;
+        // 退潮時留下的泡沫蕾絲
+        if(cyc>.38){var lace=Math.round(60+160*sz),la=(1-cyc)*.9;
+          for(var k=0;k<lace;k++){var lx=(k*97.13+cw.t0*311)%W,ly=front(lx)+((k*53.7)%(26+40*sz)),r=.8+((k*7.3)%2.4);
+            x.fillStyle='rgba(255,255,255,'+(la*(.35+((k*13)%10)/20)).toFixed(2)+')';x.beginPath();x.arc(lx,ly,r,0,6.28);x.fill();}}
+        // 大浪拍上來的瞬間濺起水花
+        if(sz>.5&&cyc>.25&&cyc<.45&&!cw.sprayed){cw.sprayed=true;var nsp=Math.round(80+260*(sz-.5));
+          for(var q=0;q<nsp;q++){var px2=Math.random()*W;spray.push({x:px2,y:front(px2),vx:(Math.random()-.5)*1.6,vy:-(1.5+Math.random()*4.5)*sz,life:0,max:.7+Math.random()*.9,r:.8+Math.random()*2.4*sz});}}
       }
+      // 水花粒子
+      for(var si=spray.length-1;si>=0;si--){var P=spray[si];P.life+=.033;P.x+=P.vx;P.y+=P.vy;P.vy+=.18;
+        if(P.life>P.max){spray.splice(si,1);continue;}
+        x.fillStyle='rgba(255,255,255,'+(1-P.life/P.max).toFixed(2)+')';x.beginPath();x.arc(P.x,P.y,P.r,0,6.28);x.fill();}
       return;
     }
     // 天空
@@ -505,7 +529,7 @@
       var g=ctx.createGain();g.gain.value=0;src.connect(f);f.connect(g);g.connect(master);src.start();return {g:g,f:f,vol:vol};}
     var rumble=layer(380,.7,.9), wash=layer(1400,.4,.55), hiss=layer(5200,.2,.25);
     function swell(){ if(!on)return;
-      var n=ctx.currentTime,dur=5.5+Math.random()*4,peak=.7+Math.random()*.3; window.__waveT=performance.now()/1000+.3; window.__waveDur=dur;
+      var n=ctx.currentTime,w=window.WAVES.next(.25),dur=w.dur,peak=.3+.75*w.size;
       [rumble,wash,hiss].forEach(function(L,k){var p=L.g.gain;p.cancelScheduledValues(n);p.setValueAtTime(p.value,n);
         var rise=dur*(.35+k*.05);p.linearRampToValueAtTime(L.vol*peak,n+rise);p.exponentialRampToValueAtTime(Math.max(.02,L.vol*.12),n+dur);
         L.f.frequency.setTargetAtTime((k===0?380:k===1?1400:5200)*(1+peak*.4),n,rise/2);L.f.frequency.setTargetAtTime(k===0?300:k===1?900:3200,n+rise,dur/3);});
@@ -516,8 +540,9 @@
     try{
       if(!ctx)build();
       on=!on;
+      window.WAVES.audio=on;
       if(on){ctx.resume();master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.8);ctx._swell();}
-      else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);window.__waveT=undefined;window.__waveDur=7;}
+      else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);}
       btn.classList.toggle('on',on);btn.setAttribute('aria-pressed',on);btn.textContent=on?'🔊 海浪聲：開':'🔈 海浪聲';
     }catch(e){btn.textContent='此瀏覽器無法播放聲音';}
   });
