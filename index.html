@@ -161,12 +161,14 @@
   #days .day{margin:0 0 16px!important;border-radius:16px!important;border-left-width:6px!important;
     background:linear-gradient(100deg,rgba(var(--dc),.30) 0%,rgba(var(--dc),.16) 50%,rgba(var(--dc),.08) 100%),rgba(255,255,255,.62)!important;
     backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);box-shadow:0 6px 20px rgba(8,60,80,.15);padding:14px 16px 8px 18px!important}
-  /* 上方選單：透明 #333333 底 */
-  nav:not(.rail){background:rgba(51,51,51,.72)!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.12)!important}
+  /* 上方選單：透明 #333333 底（45%） */
+  nav:not(.rail){background:rgba(51,51,51,.45)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.12)!important}
   nav:not(.rail) a{color:#fff!important}
   nav:not(.rail) a:hover{background:rgba(255,255,255,.16)!important}
-  /* 住宿安排、路線地圖：透明 #333333 底 */
-  #stay,#map-sec{background:rgba(51,51,51,.72)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  /* 住宿安排、路線地圖：透明 #333333 底（45%），字加淡陰影確保清楚 */
+  #stay,#map-sec,nav:not(.rail) a{text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  #stay .btn,#map-sec .btn,#map-sec .day-filter button,#stay .note,#map-sec .note{text-shadow:none}
+  #stay,#map-sec{background:rgba(51,51,51,.45)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border:1px solid rgba(255,255,255,.12)!important;color:#f3f3f3}
   #stay h2,#map-sec h2{color:#fff}
   #stay th{color:rgba(255,255,255,.65)}
