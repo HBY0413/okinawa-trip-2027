@@ -154,6 +154,13 @@
   .day .stops li{border-bottom-color:rgba(var(--dc),.25)}
   .rail a[data-sec^="d"]{color:rgb(var(--dc))}
   .rail a[data-sec^="d"].on{background:rgb(var(--dc));color:#fff}
+  /* 每日行程：拿掉外層卡片，只留每天各自的透明漸層（加毛玻璃讓字清楚） */
+  #days{background:none!important;border:none!important;box-shadow:none!important;padding:0!important}
+  #days>h2{display:inline-block;color:#fff;background:rgba(6,60,90,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    padding:6px 16px;border-radius:999px;margin:4px 0 14px;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+  #days .day{margin:0 0 16px!important;border-radius:16px!important;border-left-width:6px!important;
+    background:linear-gradient(100deg,rgba(var(--dc),.30) 0%,rgba(var(--dc),.16) 50%,rgba(var(--dc),.08) 100%),rgba(255,255,255,.62)!important;
+    backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);box-shadow:0 6px 20px rgba(8,60,80,.15);padding:14px 16px 8px 18px!important}
 </style>
 </head>
 <body>
@@ -172,7 +179,7 @@
       <span class="chip">🚗 租車 2/1 下午 – 2/6 傍晚</span>
       <span class="chip">✈️ 去程 樂桃 MM922 09:45→12:25・回程 2/7 08:15</span>
     </div>
-    <button id="soundBtn2" class="hdr-snd" type="button" aria-pressed="false">🔊 播放海浪聲</button>
+    <button id="soundBtn2" class="hdr-snd" type="button" aria-pressed="false">🔊 點一下頁面任何地方就會播放海浪聲</button>
   </div>
 </header>
 
@@ -561,10 +568,19 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       if(on){ctx.resume();master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.8);ctx._swell();}
       else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);}
       btn.classList.toggle('on',on);btn.setAttribute('aria-pressed',on);
-      btn2.classList.toggle('on',on);btn2.setAttribute('aria-pressed',on);btn2.textContent=on?'🔊 海浪聲播放中（點一下停止）':'🔊 播放海浪聲';
+      btn2.classList.toggle('on',on);btn2.setAttribute('aria-pressed',on);btn2.textContent=on?'🔊 海浪聲播放中（點一下關閉）':'🔈 海浪聲已關閉（點一下播放）';
     }catch(e){btn.title=btn2.textContent='此瀏覽器無法播放聲音';btn.disabled=btn2.disabled=true;}
   }
-  btn.addEventListener('click',toggle);btn2.addEventListener('click',toggle);
+  var userOff=false;
+  function manual(){toggle();userOff=!on;}
+  btn.addEventListener('click',manual);btn2.addEventListener('click',manual);
+  // 瀏覽器不允許一打開就自動播放：在你第一次點擊／觸碰頁面任何地方時自動開始海浪聲（按按鈕關掉後就不會再自動開）
+  function autoStart(e){
+    if(e.target&&e.target.closest&&e.target.closest('#soundBtn,#soundBtn2'))return;
+    document.removeEventListener('pointerdown',autoStart,true);document.removeEventListener('keydown',autoStart,true);
+    if(!on&&!userOff)toggle();
+  }
+  document.addEventListener('pointerdown',autoStart,true);document.addEventListener('keydown',autoStart,true);
   document.addEventListener('visibilitychange',function(){if(!ctx)return;if(document.hidden)ctx.suspend();else if(on)ctx.resume();});
 })();
 </script>
