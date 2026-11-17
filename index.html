@@ -250,7 +250,7 @@
   nav:not(.rail){background:none!important;border:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:8px 14px 0;max-width:1040px;margin:0 auto}
   nav:not(.rail) .wrap{max-width:none;background:rgba(51,51,51,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 4px 16px rgba(0,30,50,.15);padding:6px 10px}
-  nav:not(.rail) .wrap a:first-child{margin-left:auto}
+  nav:not(.rail) .wrap a:first-of-type{margin-left:auto}
   nav:not(.rail) .wrap a:last-child{margin-right:auto}
   .day,section{scroll-margin-top:70px}
   /* 標題區置中 */
@@ -286,6 +286,16 @@
   }
   /* 標題區資訊標籤：同選單的透明 #333333 底 */
   header .chip{background:rgba(51,51,51,.45);border-color:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff}
+
+  /* 海浪聲開關：放在固定的導覽列左側，捲到哪裡都能開關 */
+  nav:not(.rail) .wrap{position:relative}
+  nav:not(.rail) .wrap .hdr-snd{position:absolute;left:10px;right:auto;top:50%;transform:translateY(-50%);margin:0!important;
+    padding:6px 12px;font-size:14px;line-height:1.2;z-index:2}
+  @media (max-width:900px){
+    nav:not(.rail) .wrap .hdr-snd{position:sticky;left:0;top:auto;transform:none;flex:0 0 auto;padding:6px 9px;margin-right:4px!important;
+      background:rgba(51,51,51,.75)}
+    nav:not(.rail) .wrap .hdr-snd.on{background:var(--sun)}
+  }
 </style>
 </head>
 <body>
@@ -295,7 +305,6 @@
 <div id="progress"></div>
 <nav class="rail" aria-label="活動軸"><a class="top" href="#top" title="回到頂端">⬆<span class="tip">回到頂端</span></a><span class="line"></span><a href="#map-sec" data-sec="map-sec">地圖<span class="tip">路線地圖</span></a><span class="line"></span><a href="#d1" data-sec="d1">D1<span class="tip">2/1 那霸・南城溫泉</span></a><span class="line"></span><a href="#d2" data-sec="d2">D2<span class="tip">2/2 那霸→國頭</span></a><span class="line"></span><a href="#d3" data-sec="d3">D3<span class="tip">2/3 美麗海・今歸仁・古宇利</span></a><span class="line"></span><a href="#d4" data-sec="d4">D4<span class="tip">2/4 國頭悠閒日</span></a><span class="line"></span><a href="#d5" data-sec="d5">D5<span class="tip">2/5 國頭→讀谷→北谷→那霸</span></a><span class="line"></span><a href="#d6" data-sec="d6">D6<span class="tip">2/6 首里→那霸</span></a><span class="line"></span><a href="#d7" data-sec="d7">D7<span class="tip">2/7 回程</span></a></nav>
 <header id="top">
-  <button id="soundBtn2" class="hdr-snd" type="button" aria-pressed="false" title="點一下頁面任何地方也會開始播放"><span class="ico">🔈</span><span class="lbl">海浪聲：關</span></button>
   <div class="wrap">
     <h1>🌊 沖繩自駕 7 天 6 夜</h1>
     <p>那霸 → 國頭（山原）連住 3 晚 → 讀谷・北谷 → 那霸</p>
@@ -308,7 +317,7 @@
   </div>
 </header>
 
-<nav><div class="wrap">
+<nav><div class="wrap"><button id="soundBtn2" class="hdr-snd" type="button" aria-pressed="false" title="點一下頁面任何地方也會開始播放"><span class="ico">🔈</span><span class="lbl">海浪聲：關</span></button>
   <a href="#stay">住宿</a><a href="#map-sec">路線地圖</a><a href="#days">每日行程</a><a href="#must">必去景點</a>
   <a href="#shop">購物</a><a href="#onsen">溫泉</a><a href="#tips">注意事項</a>
 </div></nav>
@@ -574,7 +583,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   var W,H,dpr,t=0,last=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size(){dpr=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);}
   addEventListener('resize',size);size();
-  var spray=[],cover=null,photoState='loading',img=new Image();img.onload=function(){photoState='ok';if(reduce)requestAnimationFrame(draw);};img.onerror=function(){photoState='fail';document.getElementById('bgphoto').style.display='none';if(reduce)requestAnimationFrame(draw);};img.src='bg-okinawa.jpg';
+  var spray=[],leaves=[],cover=null,photoState='loading',img=new Image();img.onload=function(){photoState='ok';if(reduce)requestAnimationFrame(draw);};img.onerror=function(){photoState='fail';document.getElementById('bgphoto').style.display='none';if(reduce)requestAnimationFrame(draw);};img.src='bg-okinawa.jpg';
   var glints=[];for(var i=0;i<90;i++)glints.push({x:Math.random(),y:Math.random(),p:Math.random()*6.28,s:.6+Math.random()*1.6});
   function island(cx,base,w,h,col){
     x.fillStyle=col;x.beginPath();x.moveTo(cx-w/2,base);
@@ -590,11 +599,26 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       if(!cover||cover.w!==W||cover.h!==H){ // 依螢幕大小預先算好鋪滿的照片
         var iw=img.naturalWidth,ih=img.naturalHeight,sc=Math.max(W/iw,H/ih),dw=iw*sc,dh=ih*sc,ox=(W-dw)/2,oy=(H-dh)*0.55;
         var cv=document.createElement('canvas');cv.width=W*dpr;cv.height=H*dpr;var cx=cv.getContext('2d');cx.setTransform(dpr,0,0,dpr,0,0);cx.drawImage(img,ox,oy,dw,dh);
-        cover={c:cv,w:W,h:H,hz:oy+dh*0.497};
+        cover={c:cv,w:W,h:H,hz:oy+dh*0.497,ox:ox,oy:oy,sc:sc};
       }
       var hzY=Math.max(0,cover.hz);
       // 天空與沙灘以上：原樣
       x.drawImage(cover.c,0,0,W*dpr,hzY*dpr,0,0,W,hzY);
+      // 左側樹叢：被海風吹動（樹梢擺得多、樹根不動，一陣一陣的風）
+      var gust=.45+.55*(.5+.5*Math.sin(t*.37))*(.5+.5*Math.sin(t*.91+1.3));
+      var fx0=Math.max(0,cover.ox),fx1=Math.min(W,cover.ox+470*cover.sc),fy0=cover.oy+262*cover.sc,fy1=Math.min(cover.oy+392*cover.sc,hzY);
+      if(fx1>fx0+4&&fy1>fy0+4){
+        var A=(3+4.2*gust)*Math.max(.7,cover.sc),cwid=22,rh=3,fh=fy1-fy0;
+        for(var fy=fy0;fy<fy1;fy+=rh){var wgt=Math.pow((fy1-fy)/fh,1.6);if(wgt<.02)continue;
+          for(var fxx=fx0,ci=0;fxx<fx1;fxx+=cwid,ci++){var ph=ci*.55+fxx*.004;
+            var dx=A*wgt*(Math.sin(t*2.1+ph)*.75+Math.sin(t*5.3+ph*1.7)*.25+gust*.6);
+            x.drawImage(cover.c,fxx*dpr,fy*dpr,cwid*dpr,rh*dpr,fxx+dx,fy+dx*.12*wgt,cwid,rh);}}
+        // 風大時從樹叢飄出葉子
+        if(leaves.length<12&&Math.random()<.05*gust*gust){
+          leaves.push({x:fx0+Math.random()*(fx1-fx0)*.8,y:fy0+Math.random()*fh*.6,vx:1.2+Math.random()*1.8*gust,vy:-(.3+Math.random()*.8),
+            r:Math.random()*6.28,vr:(Math.random()-.5)*.25,s:3.5+Math.random()*3.5*Math.max(.8,cover.sc),life:0,max:4+Math.random()*4,
+            col:['rgba(96,150,70,','rgba(130,170,80,','rgba(70,120,60,','rgba(170,180,90,'][Math.floor(Math.random()*4)]});}
+      }
       // 海面：一條條橫向位移，越近岸波動越大
       var step=3;
       for(var y=hzY;y<H;y+=step){
@@ -639,6 +663,14 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       for(var si=spray.length-1;si>=0;si--){var P=spray[si];P.life+=.033;P.x+=P.vx;P.y+=P.vy;P.vy+=.18;
         if(P.life>P.max){spray.splice(si,1);continue;}
         x.fillStyle='rgba(255,255,255,'+(1-P.life/P.max).toFixed(2)+')';x.beginPath();x.arc(P.x,P.y,P.r,0,6.28);x.fill();}
+      // 飄落的葉子：隨風往右飄、邊轉邊慢慢落下
+      for(var li=leaves.length-1;li>=0;li--){var Lf=leaves[li];Lf.life+=.033;
+        Lf.vx+=(gust*2.2-Lf.vx)*.02;Lf.vy+=.012;Lf.x+=Lf.vx;Lf.y+=Lf.vy+Math.sin(t*3+Lf.r)*.35;Lf.r+=Lf.vr;
+        if(Lf.life>Lf.max||Lf.x>W+20||Lf.y>H){leaves.splice(li,1);continue;}
+        var la2=Math.min(1,Lf.life*3)*Math.min(1,(Lf.max-Lf.life)*1.5)*.85;
+        x.save();x.translate(Lf.x,Lf.y);x.rotate(Lf.r);x.scale(1,.45+.35*Math.abs(Math.sin(Lf.r*1.7)));
+        x.fillStyle=Lf.col+la2.toFixed(2)+')';x.beginPath();x.ellipse(0,0,Lf.s,Lf.s*.42,0,0,6.28);x.fill();
+        x.strokeStyle='rgba(40,80,40,'+(la2*.5).toFixed(2)+')';x.lineWidth=.6;x.beginPath();x.moveTo(-Lf.s,0);x.lineTo(Lf.s,0);x.stroke();x.restore();}
       return;
     }
     // 天空
@@ -722,7 +754,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   }
   document.addEventListener('pointerdown',autoStart,true);document.addEventListener('keydown',autoStart,true);
   function align(){var h=document.querySelector('header h1'),hd=document.getElementById('top');if(!h)return;
-    var hr=h.getBoundingClientRect(),tr=hd.getBoundingClientRect();btn2.style.top=(hr.top-tr.top+hr.height/2-btn2.offsetHeight/2)+'px';}
+    if(!btn2.closest('header'))return;var hr=h.getBoundingClientRect(),tr=hd.getBoundingClientRect();btn2.style.top=(hr.top-tr.top+hr.height/2-btn2.offsetHeight/2)+'px';}
   align();addEventListener('resize',align);if(document.fonts)document.fonts.ready.then(align);
   document.addEventListener('visibilitychange',function(){if(!ctx)return;if(document.hidden)ctx.suspend();else if(on)ctx.resume();});
 })();
