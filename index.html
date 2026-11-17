@@ -308,6 +308,11 @@
   .tag{border-radius:999px;padding-left:10px;padding-right:10px}
   .rail .snd .tip,.tip{border-radius:999px}
   .day{border-radius:0 16px 16px 0}
+
+  /* 資訊膠囊：2×2 等寬整齊排列（去程｜回程／人數｜租車） */
+  header .chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:680px;width:100%;margin:18px auto 0;gap:10px}
+  header .chip{justify-content:center}
+  @media (max-width:600px){header .chips{grid-template-columns:1fr;max-width:340px;gap:6px}}
 </style>
 </head>
 <body>
@@ -321,11 +326,10 @@
     <h1>🌊 沖繩自駕 7 天 6 夜</h1>
     <p>那霸 → 國頭（山原）連住 3 晚 → 讀谷・北谷 → 那霸</p>
     <div class="chips">
-      <span class="chip">📅 2027/2/1（一）– 2/7（日）</span>
-      <span class="chip">👥 3 人</span>
-      <span class="chip">🚗 租車 2/1 下午 – 2/6 傍晚</span>
       <span class="chip">🛫 去程 2/1 樂桃 MM922 09:45→12:25</span>
       <span class="chip">🛬 回程 2/7 08:15 起飛</span>
+      <span class="chip">👥 3 人</span>
+      <span class="chip">🚗 租車 2/1 下午 – 2/6 傍晚</span>
     </div>
   </div>
 </header>
