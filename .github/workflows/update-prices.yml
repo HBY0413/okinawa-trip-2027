@@ -1,0 +1,42 @@
+name: 每週更新飯店房價（樂天旅遊）
+
+on:
+  schedule:
+    # 每週一 00:00（台北時間）＝ 週日 16:00 UTC
+    - cron: "0 16 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 查詢樂天房價並更新 index.html
+        env:
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_REFERER: ${{ vars.RAKUTEN_REFERER || 'https://hby0413.github.io/' }}
+        run: python scripts/update_prices.py
+
+      - name: 提交變更
+        run: |
+          if git diff --quiet; then
+            echo "沒有變更"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Weekly hotel price update $(TZ=Asia/Taipei date +%F)"
+          git push
