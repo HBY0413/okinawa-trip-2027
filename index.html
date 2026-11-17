@@ -14,16 +14,16 @@
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
        color:var(--ink);background:var(--sand);line-height:1.65}
   header{background:linear-gradient(135deg,var(--sea-d),var(--sea) 60%,#3fb6b2);color:#fff;padding:40px 20px 56px}
-  header .wrap{max-width:860px;margin:0 auto}
+  header .wrap{max-width:1040px;margin:0 auto}
   header h1{margin:0 0 6px;font-size:clamp(26px,6vw,40px);letter-spacing:.02em}
   header p{margin:0;opacity:.9}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
   .chip{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:999px;font-size:14px}
   nav{position:sticky;top:0;z-index:10;background:rgba(246,239,227,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-  nav .wrap{max-width:860px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px}
+  nav .wrap{max-width:1040px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px}
   nav a{white-space:nowrap;text-decoration:none;color:var(--sea-d);font-weight:600;font-size:14px;padding:6px 10px;border-radius:8px}
   nav a:hover{background:#e8f3f3}
-  main{max-width:860px;margin:22px auto 40px;padding:0 14px}
+  main{max-width:1040px;margin:22px auto 40px;padding:0 14px}
   section{background:var(--card);border-radius:16px;padding:22px 20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
   h2{margin:0 0 14px;font-size:22px;color:var(--sea-d)}
   h3{margin:0;font-size:18px}
@@ -119,7 +119,7 @@
   .rail .snd .tip{display:none;position:absolute;right:42px;white-space:nowrap;background:var(--ink);color:#fff;font-weight:500;padding:3px 8px;border-radius:6px;font-size:12px}
   .rail .snd:hover .tip{display:block}
   /* 右側活動軸不壓到內容：中等寬度時內容往左讓位 */
-  @media (min-width:901px) and (max-width:1009px){main,header .wrap,nav .wrap{padding-right:64px}}
+  @media (min-width:901px) and (max-width:1181px){main,header .wrap,nav .wrap{padding-right:64px}}
   /* 手機：底部活動軸改成整條，內容最後留空間不被擋住 */
   @media (max-width:900px){
     .rail{left:8px;right:8px;bottom:8px;transform:none;max-width:none;justify-content:space-between;border-radius:16px;background:rgba(255,255,255,.97)}
@@ -183,9 +183,9 @@
   .hdr-snd .ico{font-size:16px}
   @media (max-width:900px){.hdr-snd{right:8px;padding:8px 10px}.hdr-snd .lbl{display:none}}
   /* 寬螢幕：活動軸貼在內容區右側（整個網頁置中的那一欄旁邊），聲音按鈕與活動軸右邊切齊 */
-  @media (min-width:1010px){
-    .rail{right:calc(50% - 494px)}
-    .hdr-snd{right:calc(50% - 494px)}
+  @media (min-width:1182px){
+    .rail{right:calc(50% - 584px)}
+    .hdr-snd{right:calc(50% - 584px)}
   }
 </style>
 </head>
