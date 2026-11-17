@@ -119,7 +119,7 @@
   .rail .snd .tip{display:none;position:absolute;right:42px;white-space:nowrap;background:var(--ink);color:#fff;font-weight:500;padding:3px 8px;border-radius:6px;font-size:12px}
   .rail .snd:hover .tip{display:block}
   /* 右側活動軸不壓到內容：中等寬度時內容往左讓位 */
-  @media (min-width:901px) and (max-width:1181px){main,header .wrap,nav .wrap{padding-right:64px}}
+  @media (min-width:901px) and (max-width:1181px){main,header .wrap,nav:not(.rail){padding-right:64px!important}}
   /* 手機：底部活動軸改成整條，內容最後留空間不被擋住 */
   @media (max-width:900px){
     .rail{left:8px;right:8px;bottom:8px;transform:none;max-width:none;justify-content:space-between;border-radius:16px;background:rgba(255,255,255,.97)}
@@ -186,6 +186,80 @@
   @media (min-width:1182px){
     .rail{right:calc(50% - 584px)}
     .hdr-snd{right:calc(50% - 584px)}
+  }
+
+  /* ===== RWD：平板（≤900px）===== */
+  @media (max-width:900px){
+    header{padding:28px 16px 40px}
+    #map{height:400px}
+  }
+  /* ===== RWD：手機（≤600px）===== */
+  @media (max-width:600px){
+    header{padding:22px 14px 30px}
+    header p{font-size:14px}
+    .chips{gap:6px;margin-top:14px}
+    .chip{font-size:12.5px;padding:3px 10px}
+    /* 上方選單：可左右滑，右側淡出提示還有更多 */
+    nav:not(.rail) .wrap{padding:6px 8px;gap:0;scrollbar-width:none;
+      -webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
+    nav:not(.rail) .wrap::-webkit-scrollbar{display:none}
+    nav:not(.rail) a{font-size:13.5px;padding:7px 9px}
+    main{padding:0 8px;margin-top:14px}
+    section{padding:18px 14px;border-radius:14px}
+    h2{font-size:20px}
+    /* 住宿表格改成一間一張卡片 */
+    #stay table,#stay tbody,#stay tr,#stay td{display:block;width:100%}
+    #stay thead{display:none}
+    #stay tr{display:grid;grid-template-columns:auto 1fr;column-gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.14)}
+    #stay td{border:none!important;padding:0!important}
+    #stay td:nth-child(1){font-weight:700;color:#fff}
+    #stay td:nth-child(2){color:rgba(255,255,255,.75)}
+    #stay td:nth-child(2)::before{content:"・"}
+    #stay td:nth-child(3){grid-column:1/-1;margin-top:4px}
+    #stay td:nth-child(4){display:block!important;grid-column:1/-1;margin-top:6px;font-size:13px;color:rgba(255,255,255,.75)}
+    #stay td:nth-child(4)::before{content:"預算（三人一間）"}
+    /* 地圖：天數按鈕改成一排左右滑，不佔高度 */
+    .day-filter{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+    .day-filter::-webkit-scrollbar{display:none}
+    .day-filter button{flex:0 0 auto}
+    #map{height:340px}
+    /* 開車路線按鈕兩欄排列 */
+    .nav-links{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .nav-links .btn{justify-content:center;font-size:12px;padding:6px 6px}
+    /* 每日行程 */
+    #days .day{padding:12px 10px 6px 12px!important;border-left-width:5px!important}
+    .day-head h3{font-size:16.5px}
+    .stops li{gap:8px}
+    .time{flex-basis:44px;font-size:13px}
+    .stop-note{font-size:13.5px}
+    .pin-badge{min-width:20px;height:20px;font-size:11px;margin-right:6px}
+    details.eat summary{padding:8px 10px;font-size:13.5px}
+    details.eat ol{padding:0 8px 8px 24px}
+    .btn{padding:5px 10px}
+    .grid{grid-template-columns:1fr}
+  }
+  /* 很窄的手機（≤360px） */
+  @media (max-width:360px){
+    .time{flex-basis:40px;font-size:12px}
+    .rail a{width:26px!important;height:26px!important;flex-basis:26px!important;font-size:11px}
+  }
+  /* 手機橫放：高度很矮時，地圖別撐滿整個螢幕 */
+  @media (max-height:500px) and (orientation:landscape){#map{height:260px}}
+
+  /* 導覽列：不再左右吃滿，改成跟內文同寬的浮動圓角條 */
+  nav:not(.rail){background:none!important;border:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:8px 14px 0;max-width:1040px;margin:0 auto}
+  nav:not(.rail) .wrap{max-width:none;background:rgba(51,51,51,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 4px 16px rgba(0,30,50,.15);padding:6px 10px}
+  nav:not(.rail) .wrap a:first-child{margin-left:auto}
+  nav:not(.rail) .wrap a:last-child{margin-right:auto}
+  .day,section{scroll-margin-top:70px}
+  /* 標題區置中 */
+  header .wrap{text-align:center}
+  header .chips{justify-content:center}
+  @media (max-width:600px){
+    nav:not(.rail){padding:6px 8px 0}
+    nav:not(.rail) .wrap{padding:4px 6px;border-radius:12px}
+    header h1{padding:0 44px}
   }
 </style>
 </head>
