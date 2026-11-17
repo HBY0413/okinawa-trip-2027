@@ -1012,6 +1012,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     grass=[];var gn=Math.round(W/26);for(var j=0;j<gn;j++)grass.push({x:j*26+Math.random()*20,h:30+Math.random()*70,w:2+Math.random()*3,p:Math.random()*6.28,c:Math.random()});
     rocks=[];for(var k=0;k<Math.max(3,Math.round(W/260));k++)rocks.push({x:Math.random()*W,w:60+Math.random()*120,h:18+Math.random()*34});}
   size();addEventListener('resize',function(){size();draw(performance.now());});
+  var grain=(function(){var g=document.createElement('canvas');g.width=256;g.height=256;var c=g.getContext('2d'),im=c.createImageData(256,256);for(var i=0;i<im.data.length;i+=4){var v=Math.random()*255|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255;}c.putImageData(im,0,0);return g;})();
   function depthNow(){var m=document.documentElement.scrollHeight-innerHeight;return m>0?Math.min(1,Math.max(0,scrollY/m)):0;}
   function lerp(a,b,t){return a+(b-a)*t}
   function col(a,b,t,al){return 'rgba('+Math.round(lerp(a[0],b[0],t))+','+Math.round(lerp(a[1],b[1],t))+','+Math.round(lerp(a[2],b[2],t))+','+al+')'}
@@ -1031,46 +1032,41 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     x.fillStyle=g;x.fillRect(0,0,W,H);
     // 從水面照下來的光束
     var ra=.16*(1-u*.85);
-    if(ra>.01){x.globalCompositeOperation='lighter';
+    if(ra>.01){x.save();x.filter='blur(14px)';x.globalCompositeOperation='lighter';
       for(var i=0;i<7;i++){var cx=W*(.08+i*.14)+Math.sin(t*.25+i*1.7)*W*.03,sp=W*(.035+.02*Math.sin(i*2.1)),tilt=W*.12;
         var rg=x.createLinearGradient(0,0,0,H*.95);rg.addColorStop(0,'rgba(220,250,255,'+(ra*(.6+.4*Math.sin(t*.7+i))).toFixed(3)+')');rg.addColorStop(1,'rgba(220,250,255,0)');
         x.fillStyle=rg;x.beginPath();x.moveTo(cx-sp*.4,0);x.lineTo(cx+sp*.4,0);x.lineTo(cx+tilt+sp*1.6,H*.95);x.lineTo(cx+tilt-sp*1.6,H*.95);x.closePath();x.fill();}
+      x.filter='blur(3px)';
       // 水面波光（從水下往上看）
       var ca=.22*(1-u);if(ca>.01){x.strokeStyle='rgba(235,255,255,'+ca.toFixed(3)+')';x.lineWidth=1.2;
         for(var r=0;r<6;r++){var yy=8+r*14;x.beginPath();for(var px2=0;px2<=W;px2+=10){var v=yy+Math.sin(px2*.03+t*1.6+r)*5+Math.sin(px2*.011-t*.9+r*2)*4;px2?x.lineTo(px2,v):x.moveTo(px2,v);}x.stroke();}}
-      x.globalCompositeOperation='source-over';}
+      x.restore();}
     // 水中漂浮的細小顆粒
-    x.fillStyle='rgba(230,250,255,'+(.25+.25*u).toFixed(2)+')';
+    x.fillStyle='rgba(230,250,255,'+(.18+.15*u).toFixed(2)+')';
     for(var j=0;j<parts.length;j++){var P=parts[j];P.y-=P.v;P.x+=Math.sin(t*.6+P.p)*.15;if(P.y<-4){P.y=H+4;P.x=Math.random()*W;}
       x.beginPath();x.arc(P.x,P.y,P.r,0,6.283);x.fill();}
-    // 海底：沙地、岩石、海草
-    if(d>SEA){var sb=(d-SEA)/(1-SEA),sh=H*.26*sb*sb*(3-2*sb),top=H-sh;
-      var sg=x.createLinearGradient(0,top-10,0,H);sg.addColorStop(0,'rgba(196,186,150,.92)');sg.addColorStop(1,'rgba(150,140,110,.98)');
-      x.fillStyle=sg;x.beginPath();x.moveTo(0,H);for(var px3=0;px3<=W;px3+=16){x.lineTo(px3,top+Math.sin(px3*.008)*14+Math.sin(px3*.023)*6);}x.lineTo(W,H);x.closePath();x.fill();
-      // 沙紋
-      x.strokeStyle='rgba(255,250,230,.18)';x.lineWidth=1.2;for(var q=1;q<5;q++){x.beginPath();var qy=top+sh*q/5;for(var px5=0;px5<=W;px5+=14){var vy=qy+Math.sin(px5*.03+q)*3;px5?x.lineTo(px5,vy):x.moveTo(px5,vy);}x.stroke();}
-      // 岩石與珊瑚
-      rocks.forEach(function(R,ri){var ry=top+Math.sin(R.x*.008)*14+sh*.3;
-        x.fillStyle='rgba(70,80,85,.95)';x.beginPath();x.ellipse(R.x,ry,R.w*.5*sb,R.h*sb,0,Math.PI,0);x.fill();
-        x.fillStyle='rgba(110,120,120,.6)';x.beginPath();x.ellipse(R.x-R.w*.12*sb,ry-R.h*.55*sb,R.w*.22*sb,R.h*.25*sb,0,0,6.283);x.fill();
-        var cc=['rgba(232,120,110,.9)','rgba(240,170,90,.9)','rgba(200,110,170,.85)'][ri%3];x.strokeStyle=cc;x.lineCap='round';
-        for(var br=0;br<5;br++){var bx0=R.x+(br-2)*R.w*.12*sb,bh=(20+((ri*7+br*13)%25))*sb,sw2=Math.sin(t*.9+br+ri)*3*sb;x.lineWidth=4*sb+1;
-          x.beginPath();x.moveTo(bx0,ry-R.h*sb*.8);x.quadraticCurveTo(bx0+sw2,ry-R.h*sb-bh*.5,bx0+sw2*1.5+(br-2)*4*sb,ry-R.h*sb-bh);x.stroke();
-          x.fillStyle=cc;x.beginPath();x.arc(bx0+sw2*1.5+(br-2)*4*sb,ry-R.h*sb-bh,3*sb+1,0,6.283);x.fill();}});
-      // 海草（有粗細的葉片）
-      grass.forEach(function(G){var gy=top+Math.sin(G.x*.008)*14+6,gh=G.h*sb;if(gh<4)return;
-        var sw=Math.sin(t*1.1+G.p)*gh*.28,bw=G.w*1.6;x.fillStyle=G.c<.5?'rgba(46,120,84,.92)':'rgba(70,140,92,.85)';
-        x.beginPath();x.moveTo(G.x-bw,gy);x.quadraticCurveTo(G.x-bw*.4+sw*.5,gy-gh*.55,G.x+sw,gy-gh);x.quadraticCurveTo(G.x+bw*.4+sw*.5,gy-gh*.55,G.x+bw,gy);x.closePath();x.fill();});
-      // 水中霧化，讓海底融進深藍
-      var fg=x.createLinearGradient(0,top-30,0,H);fg.addColorStop(0,'rgba(8,50,95,.45)');fg.addColorStop(1,'rgba(8,40,80,.15)');x.fillStyle=fg;x.fillRect(0,top-30,W,H-top+30);
-      // 海底的光斑
-      x.globalCompositeOperation='lighter';x.fillStyle='rgba(200,255,250,'+(.08*sb).toFixed(3)+')';
-      for(var c2=0;c2<14;c2++){var lx=(c2*W/14+Math.sin(t*.5+c2)*30)%W,ly=top+20+((c2*37)%Math.max(10,sh-20));x.beginPath();x.ellipse(lx,ly,26,6,0,0,6.283);x.fill();}
-      x.globalCompositeOperation='source-over';}
+    // 海底：柔和的沙地（模糊、帶顆粒與光斑），不畫卡通物件
+    if(d>SEA){var sb=(d-SEA)/(1-SEA),sh=H*.34*sb*sb*(3-2*sb),top=H-sh;
+      x.save();x.filter='blur(10px)';
+      var sg=x.createLinearGradient(0,top-40,0,H);sg.addColorStop(0,'rgba(60,110,130,0)');sg.addColorStop(.35,'rgba(130,150,140,.75)');sg.addColorStop(1,'rgba(165,160,130,.95)');
+      x.fillStyle=sg;x.beginPath();x.moveTo(0,H);for(var px3=0;px3<=W;px3+=24){x.lineTo(px3,top+Math.sin(px3*.006)*18+Math.sin(px3*.017)*8);}x.lineTo(W,H);x.closePath();x.fill();
+      // 海底光斑（水面折射）
+      x.globalCompositeOperation='lighter';
+      for(var c2=0;c2<26;c2++){var lx=(c2*W/26+Math.sin(t*.45+c2*1.3)*28+W)%W,ly=top+sh*.25+((c2*53)%Math.max(10,sh*.7));
+        x.fillStyle='rgba(210,255,240,'+(.10*sb*(.6+.4*Math.sin(t*1.3+c2))).toFixed(3)+')';x.beginPath();x.ellipse(lx,ly,30+((c2*17)%30),7+((c2*7)%6),Math.sin(c2)*.4,0,6.283);x.fill();}
+      x.restore();
+      // 沙的顆粒質感
+      if(grain){x.globalAlpha=.22*sb;x.drawImage(grain,0,top-10,W,sh+10);x.globalAlpha=1;}
+      // 水中霧化
+      var fg=x.createLinearGradient(0,top-60,0,H);fg.addColorStop(0,'rgba(8,55,100,.55)');fg.addColorStop(1,'rgba(8,45,85,.12)');x.fillStyle=fg;x.fillRect(0,top-60,W,H-top+60);}
+    // 整體暗角與顆粒，像水中攝影
+    var vg=x.createRadialGradient(W/2,H*.45,Math.min(W,H)*.25,W/2,H*.5,Math.max(W,H)*.8);vg.addColorStop(0,'rgba(0,10,30,0)');vg.addColorStop(1,'rgba(0,10,30,'+(.35+.25*u).toFixed(2)+')');
+    x.fillStyle=vg;x.fillRect(0,0,W,H);
+    if(grain){x.globalAlpha=.035;x.drawImage(grain,0,0,W,H);x.globalAlpha=1;}
     x.restore();
     // 穿過水面時的白色水花線
-    if(d<B){x.strokeStyle='rgba(255,255,255,.85)';x.lineWidth=3;x.beginPath();for(var p4=0;p4<=W;p4+=8){var y4=wl+Math.sin(p4*.02+t*2.2)*7+Math.sin(p4*.047-t*3.1)*3;p4?x.lineTo(p4,y4):x.moveTo(p4,y4);}x.stroke();
-      x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=8;x.stroke();}
+    if(d<B){x.save();x.filter='blur(2.5px)';x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=3;x.beginPath();for(var p4=0;p4<=W;p4+=8){var y4=wl+Math.sin(p4*.02+t*2.2)*7+Math.sin(p4*.047-t*3.1)*3;p4?x.lineTo(p4,y4):x.moveTo(p4,y4);}x.stroke();
+      x.filter='blur(9px)';x.strokeStyle='rgba(230,250,255,.35)';x.lineWidth=14;x.stroke();x.restore();}
   }
   function loop(ts){requestAnimationFrame(loop);if(ts-last<33)return;last=ts;
     dTarget=depthNow();d+= (dTarget-d)*.18;if(Math.abs(dTarget-d)<.0005)d=dTarget;draw(ts);}
