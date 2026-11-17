@@ -17,6 +17,41 @@
   window.addEventListener('pageshow',function(e){if(e.persisted)top();});
 })();
 </script>
+<script>
+// ===== 共用：水深換算（D1 行程出現時才下水）＋擬真泡泡繪製 =====
+(function(){
+  var A=.10,B=.20,s1=1,s2=2,mx=3;
+  function measure(){var el=document.getElementById('d1'),H=innerHeight;mx=Math.max(1,document.documentElement.scrollHeight-H);
+    var top=el?el.getBoundingClientRect().top+scrollY:mx*.15;s1=Math.max(40,top-H*.55);s2=Math.min(mx-1,s1+H*.9);}
+  window.DIVE={A:A,B:B,measure:measure,depth:function(){var y=Math.max(0,scrollY);
+    if(y<=s1)return A*y/s1; if(y<=s2)return A+(B-A)*(y-s1)/(s2-s1); return Math.min(1,B+(1-B)*(y-s2)/Math.max(1,mx-s2));}};
+  addEventListener('resize',measure);addEventListener('load',function(){measure();setTimeout(measure,500);});
+  if(document.fonts)document.fonts.ready.then(measure);document.addEventListener('DOMContentLoaded',measure);measure();
+  // 泡泡圖樣：外緣一圈暗折射邊、內側銀白亮邊、底部聚光、頂端高光（像水中攝影的氣泡）
+  var SP={};
+  function sprite(px){var key=px;if(SP[key])return SP[key];var R=px,c=document.createElement('canvas');c.width=c.height=R*2+8;var g=c.getContext('2d'),o=R+4;
+    var rim=g.createRadialGradient(o,o,R*.45,o,o,R);rim.addColorStop(0,'rgba(210,240,255,0.02)');rim.addColorStop(.72,'rgba(200,235,250,0.06)');rim.addColorStop(.9,'rgba(235,250,255,0.42)');rim.addColorStop(1,'rgba(255,255,255,0.75)');
+    g.fillStyle=rim;g.beginPath();g.arc(o,o,R,0,6.283);g.fill();
+    g.strokeStyle='rgba(5,35,65,0.38)';g.lineWidth=Math.max(.8,R*.06);g.beginPath();g.arc(o,o,R-g.lineWidth*.5,0,6.283);g.stroke();
+    g.strokeStyle='rgba(255,255,255,0.35)';g.lineWidth=Math.max(.6,R*.08);g.beginPath();g.arc(o,o,R*.74,.35,2.75);g.stroke();
+    var hl=g.createRadialGradient(o-R*.36,o-R*.4,0,o-R*.36,o-R*.4,R*.32);hl.addColorStop(0,'rgba(255,255,255,0.98)');hl.addColorStop(.45,'rgba(255,255,255,0.55)');hl.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=hl;g.beginPath();g.ellipse(o-R*.36,o-R*.4,R*.32,R*.22,-.6,0,6.283);g.fill();
+    g.fillStyle='rgba(255,255,255,0.55)';g.beginPath();g.arc(o+R*.28,o-R*.5,Math.max(.6,R*.06),0,6.283);g.fill();
+    SP[key]=c;return c;}
+  // 單顆泡泡：小的近乎球形；大的會晃動變形（扁、下緣略平），整體依深度略帶藍
+  window.drawBubble=function(c,x,y,r,a,ph){if(a<=0.01)return;
+    if(r<1.4){c.fillStyle='rgba(225,245,255,'+(a*.7).toFixed(3)+')';c.beginPath();c.arc(x,y,r,0,6.283);c.fill();return;}
+    var spr=sprite(r<4?8:r<9?18:32),sc=r/((spr.width-8)/2);
+    var wob=r>3.5?Math.min(.2,r*.018):0,sx=1+wob*Math.sin(ph*1.7),sy=1-wob*.8*Math.sin(ph*1.7)-(r>7?.12:0);
+    c.save();c.globalAlpha=a;c.translate(x,y);c.rotate(Math.sin(ph*.9)*wob*.8);c.scale(sx*sc,sy*sc);c.drawImage(spr,-spr.width/2,-spr.height/2);c.restore();};
+  // 物理：終端速度 ∝ √半徑；小泡直線、大泡左右擺盪；上升時因水壓降低略微變大
+  window.newBubble=function(x,y,r){var vt=(.35+Math.sqrt(r)*.7)*(.85+Math.random()*.3);
+    return {x:x,y:y,r:r,vy:vt*.25,vt:vt,ph:Math.random()*6.28,wf:r>3?.09+Math.random()*.05:.03+Math.random()*.04,wa:r>3?.35+r*.07:.06+Math.random()*.1,age:0};};
+  window.stepBubble=function(b,dt){b.age+=dt;b.vy+=(b.vt-b.vy)*.045*dt;b.y-=b.vy*dt;b.ph+=b.wf*dt;b.x+=Math.sin(b.ph)*b.wa*dt;b.r*=1+.0005*dt;};
+  // 尺寸分布：多數是極小氣泡，偶爾中型，少數大氣泡
+  window.bubbleSize=function(scale){var q=Math.random();return (q<.62?.6+Math.random()*1.2:q<.9?1.8+Math.random()*3:4.5+Math.pow(Math.random(),1.5)*9)*(scale||1);};
+})();
+</script>
 <style>
   :root{
     --sea:#0e7c86; --sea-d:#0a5a62; --sand:#f6efe3; --sun:#f2994a;
@@ -953,18 +988,18 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     ctx._bus=ctx.createGain();ctx._bus.connect(fx);ctx._bus.connect(dl);
     ctx._d=0;
     // 燕鷗（沖繩常見的紅燕鷗、黑枕燕鷗）：沙啞的「キィーアッ」「キッキッ」叫聲，從左右遠近隨機傳來
-    var birdBus=ctx.createGain();birdBus.gain.value=.5;birdBus.connect(uw);
-    ctx._tern=function(){var n=1+Math.floor(Math.random()*4),t=ctx.currentTime+.05,pan=Math.random()*1.6-.8,far=.35+Math.random()*.65,kind=Math.random();
+    var birdBus=ctx.createGain();birdBus.gain.value=.11;var birdLP=ctx.createBiquadFilter();birdLP.type='lowpass';birdLP.frequency.value=3200;birdLP.Q.value=.5;birdBus.connect(birdLP);birdLP.connect(uw);   // 背景音量、柔化高頻
+    ctx._tern=function(){var n=1+Math.floor(Math.random()*3),t=ctx.currentTime+.05,pan=Math.random()*1.6-.8,far=.4+Math.random()*.5,kind=Math.random();
       var P=ctx.createStereoPanner?ctx.createStereoPanner():null;var out=ctx.createGain();out.gain.value=far;if(P){P.pan.value=pan;out.connect(P);P.connect(birdBus);}else out.connect(birdBus);
-      for(var i=0;i<n;i++){var long=kind<.55&&i===0,dur=long?.26+Math.random()*.12:.07+Math.random()*.05,f0=(long?3300:3800)+Math.random()*600,f1=long?1900+Math.random()*300:3000+Math.random()*400;
+      for(var i=0;i<n;i++){var long=kind<.55&&i===0,dur=long?.26+Math.random()*.12:.07+Math.random()*.05,f0=(long?2500:2800)+Math.random()*350,f1=long?1500+Math.random()*250:2200+Math.random()*300;
         var o=ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(f0*.92,t);o.frequency.linearRampToValueAtTime(f0,t+dur*.18);o.frequency.exponentialRampToValueAtTime(f1,t+dur);
         var am=ctx.createOscillator(),amG=ctx.createGain();am.frequency.value=70+Math.random()*60;amG.gain.value=.45;am.connect(amG);   // 沙啞感
-        var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f0*.85;bp.Q.value=3.5;var hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=1200;
+        var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f0*.85;bp.Q.value=1.6;var hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=900;
         var g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.32,t+.012);g.gain.setValueAtTime(.32,t+dur*.6);g.gain.exponentialRampToValueAtTime(.001,t+dur);
         var vg=ctx.createGain();vg.gain.value=.55;amG.connect(vg.gain);
         o.connect(bp);bp.connect(hp);hp.connect(vg);vg.connect(g);g.connect(out);o.start(t);am.start(t);o.stop(t+dur+.02);am.stop(t+dur+.02);
         t+=dur+(long?.12+Math.random()*.15:.06+Math.random()*.09);}};
-    ctx._depth=function(d){ctx._d=d;var k=Math.max(0,Math.min(1,(d-.04)/.12));var n=ctx.currentTime;var deep=Math.max(0,(d-.1)/.9);
+    ctx._depth=function(d){ctx._d=d;var k=Math.max(0,Math.min(1,(d-.085)/.09));var n=ctx.currentTime;var deep=Math.max(0,(d-.1)/.9);
       uw.frequency.setTargetAtTime(18000*Math.pow(300/18000,k),n,.3);uwGain.gain.setTargetAtTime(Math.pow(1-k,1.6),n,.35);   // 海浪聲：海面清楚 → 水中聽不到
       ambG.gain.setTargetAtTime(k*(.10+.22*deep),n,.6);ambF.frequency.setTargetAtTime(200-110*deep,n,.6);
       fb.gain.setTargetAtTime(.15+.4*deep,n,.4);wet.gain.setTargetAtTime(k*(.15+.45*deep),n,.4);dl.delayTime.setTargetAtTime(.14+.16*deep,n,.4);};
@@ -993,7 +1028,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       if(on){ctx.resume();master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.8);ctx._swell();}
       else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);}
       btn.classList.toggle('on',on);btn.setAttribute('aria-pressed',on);
-      btn2.classList.toggle('on',on);btn2.setAttribute('aria-pressed',on);btn2.querySelector('.ico').textContent=on?'🔊':'🔈';btn2.querySelector('.lbl').textContent=on?'海浪聲：開':'海浪聲：關';if(on&&ctx._depth){var m0=document.documentElement.scrollHeight-innerHeight;ctx._depth(m0>0?scrollY/m0:0);}
+      btn2.classList.toggle('on',on);btn2.setAttribute('aria-pressed',on);btn2.querySelector('.ico').textContent=on?'🔊':'🔈';btn2.querySelector('.lbl').textContent=on?'海浪聲：開':'海浪聲：關';if(on&&ctx._depth){ctx._depth(window.DIVE?DIVE.depth():0);}
     }catch(e){btn2.title='此瀏覽器無法播放聲音';btn2.disabled=true;}
   }
   // 給下潛效果用：深度改變水中悶聲、往下捲時咕嚕咕嚕
@@ -1004,7 +1039,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       var n=1+Math.min(6,Math.floor(speed/450)+(Math.random()<.5?1:0)),sp=Math.max(.028,.17-speed/9000)*(1+.8*deep),t=now+.01;
       for(var i=0;i<n;i++){ctx._blub(t,Math.random());t+=sp*(.6+Math.random()*.8);}}};
   // 在海面時偶爾傳來燕鷗叫聲（潛到水裡就聽不到）
-  (function gull(){setTimeout(function(){if(on&&ctx&&ctx._tern&&ctx._d<.05&&!document.hidden){ctx._tern();if(Math.random()<.3)setTimeout(function(){if(on&&ctx._d<.05)ctx._tern();},600+Math.random()*1500);}gull();},9000+Math.random()*16000);})();
+  (function gull(){setTimeout(function(){if(on&&ctx&&ctx._tern&&ctx._d<.08&&!document.hidden){ctx._tern();if(Math.random()<.1)setTimeout(function(){if(on&&ctx._d<.08)ctx._tern();},600+Math.random()*1500);}gull();},(Math.random()<.5?20000+Math.random()*10000:40000+Math.random()*10000));})();   // 20–30 秒或 40–50 秒一次
   // 在水中時偶爾自己冒幾顆泡泡聲
   (function idle(){setTimeout(function(){if(on&&ctx&&ctx._blub&&ctx._d>.12&&!document.hidden){var t=ctx.currentTime+.02,n=1+Math.floor(Math.random()*3);for(var i=0;i<n;i++){ctx._blub(t,Math.random()*.6);t+=.08+Math.random()*.2;}}idle();},2500+Math.random()*5000);})();
   var userOff=false;
@@ -1046,28 +1081,16 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var bc=document.getElementById('breath'),bx=bc.getContext('2d'),c=document.getElementById('dive'),x=c.getContext('2d'),W,H,dpr,bub=[],lastY=scrollY,vel=0,breath=0,depth=0,running=false,lastT=0;
   var mobile=matchMedia('(max-width:700px)').matches;
-  function drawBub(c,px,py,r,fa,ph){if(fa<=0)return;
-    if(r<2.2){c.fillStyle='rgba(235,250,255,'+(fa*.55).toFixed(3)+')';c.beginPath();c.arc(px,py,r,0,6.283);c.fill();return;}
-    var sq=r>4.5?1-.13*Math.abs(Math.sin(ph*1.4)):1;c.save();c.translate(px,py);c.scale(1/sq*.98+.02,sq);
-    var g=c.createRadialGradient(-r*.25,-r*.3,r*.1,0,0,r);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.7,'rgba(220,245,255,'+(fa*.06).toFixed(3)+')');g.addColorStop(1,'rgba(235,252,255,'+(fa*.38).toFixed(3)+')');
-    c.fillStyle=g;c.beginPath();c.arc(0,0,r,0,6.283);c.fill();
-    c.strokeStyle='rgba(240,252,255,'+(fa*.45).toFixed(3)+')';c.lineWidth=Math.max(.6,r*.07);c.stroke();
-    c.fillStyle='rgba(255,255,255,'+(fa*.85).toFixed(3)+')';c.beginPath();c.ellipse(-r*.38,-r*.4,r*.2,r*.12,-.6,0,6.283);c.fill();
-    c.strokeStyle='rgba(255,255,255,'+(fa*.3).toFixed(3)+')';c.lineWidth=Math.max(.5,r*.05);c.beginPath();c.arc(0,0,r*.72,.3,1.25);c.stroke();c.restore();}
   function size(){dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);bc.width=W*dpr;bc.height=Math.round(H*.45)*dpr;bx.setTransform(dpr,0,0,dpr,0,0);
     mobile=matchMedia('(max-width:700px)').matches;}
   size();addEventListener('resize',size);
   function contentEdge(){var m=document.querySelector('main');if(!m)return null;var r=m.getBoundingClientRect();return [r.left+14,r.right-14];}
-  function spawn(n){var e=contentEdge();for(var i=0;i<n;i++){
-      var px;
-      px=Math.random()*W;
-      var r=(mobile?1:1.2)+Math.pow(Math.random(),2.2)*(mobile?8:11);
-      var vt=(.4+Math.sqrt(r)*.75)*(.8+Math.random()*.4);bub.push({x:px,y:H+r+Math.random()*40,r:r,vy:vt*.4,vt:vt,ph:Math.random()*6.28,wf:r>3.5?.07+Math.random()*.05:.02+Math.random()*.03,wa:r>3.5?.25+r*.06:.05+Math.random()*.08,a:.75,life:0});}
-  }
+  function spawn(n){for(var i=0;i<n;i++){var px=Math.random()*W,r=bubbleSize(mobile?.8:1),B0=newBubble(px,H+r+Math.random()*30,r);B0.a=.9;bub.push(B0);
+      if(r<2&&Math.random()<.5){for(var k=1;k<3+Math.floor(Math.random()*5);k++){var rr=bubbleSize(.6),T=newBubble(px+(Math.random()-.5)*4,H+r+k*(5+Math.random()*9)+30,Math.min(rr,2));T.a=.85;T.ph=B0.ph+k*.4;bub.push(T);}}}}
   var lastST=performance.now();
   function onScroll(){var y=scrollY,d=y-lastY;lastY=y;var nowT=performance.now(),dtS=Math.max(8,nowT-lastST);lastST=nowT;var spd=Math.abs(d)/dtS*1000;vel=vel*.6+d*.4;
-    var max=document.documentElement.scrollHeight-H;depth=max>0?Math.min(1,y/max):0;if(window.SND)SND.depth(depth);
-    if(d>0){spawn(Math.min(mobile?4:6,Math.ceil(d/(mobile?30:20))));if(window.SND&&depth>.06)SND.glug(spd);}
+    depth=window.DIVE?DIVE.depth():0;if(window.SND)SND.depth(depth);
+    if(d>0&&depth>DIVE.A){spawn(Math.min(mobile?6:10,Math.ceil(d/(mobile?18:12))));if(window.SND)SND.glug(spd);}
     else if(d<-2){breath=Math.min(1,breath+Math.min(.5,-d/250));}
     if(!running){running=true;requestAnimationFrame(loop);}
   }
@@ -1076,9 +1099,9 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     x.clearRect(0,0,W,H);
     // 水深色調：越往下越深一點點
     // 泡泡
-    for(var i=bub.length-1;i>=0;i--){var b=bub[i];b.life+=dt;b.vy+=(b.vt-b.vy)*.05*dt;b.y-=b.vy*dt;b.ph+=b.wf*dt;b.x+=Math.sin(b.ph)*b.wa*dt;b.r*=1+.0006*dt;
+    for(var i=bub.length-1;i>=0;i--){var b=bub[i];stepBubble(b,dt);
       if(b.y<-30){bub.splice(i,1);continue;}
-      var fade=Math.min(1,b.life/12)*Math.min(1,(b.y+30)/(H*.3));drawBub(x,b.x,b.y,b.r,b.a*fade,b.ph);}
+      drawBubble(x,b.x,b.y,b.r,b.a*Math.min(1,b.age/10)*Math.min(1,(b.y+30)/(H*.3)),b.ph);}
     // 浮出水面：頂端透進光、水面波紋、吸一口氣（疊在內容上方，只在往上滑時短暫出現）
     bx.clearRect(0,0,W,H*.45);
     if(breath>0.01){var bh=H*(.16+.26*breath);
@@ -1103,7 +1126,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     rocks=[];for(var k=0;k<Math.max(3,Math.round(W/260));k++)rocks.push({x:Math.random()*W,w:60+Math.random()*120,h:18+Math.random()*34});}
   size();addEventListener('resize',function(){size();draw(performance.now());});
   var grain=(function(){var g=document.createElement('canvas');g.width=256;g.height=256;var c=g.getContext('2d'),im=c.createImageData(256,256);for(var i=0;i<im.data.length;i+=4){var v=Math.random()*255|0;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255;}c.putImageData(im,0,0);return g;})();
-  function depthNow(){var m=document.documentElement.scrollHeight-innerHeight;return m>0?Math.min(1,Math.max(0,scrollY/m)):0;}
+  function depthNow(){return window.DIVE?DIVE.depth():0;}
   function lerp(a,b,t){return a+(b-a)*t}
   function col(a,b,t,al){return 'rgba('+Math.round(lerp(a[0],b[0],t))+','+Math.round(lerp(a[1],b[1],t))+','+Math.round(lerp(a[2],b[2],t))+','+al+')'}
   // 階段：0–0.10 鏡頭靠近海面；0.10–0.20 穿過水面；0.20 之後在水中，越往下越深；0.80 之後看到海底
@@ -1120,16 +1143,6 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(x0+Math.cos(a+1)*l*.5,y0+Math.sin(a+1)*l*.5,x0+Math.cos(a)*l,y0+Math.sin(a)*l);c.stroke();}return g;})();
   var amb=[];
   var vents=[];
-  function mkBub(px,py,r){var vt=(.3+Math.sqrt(r)*.62)*(.85+Math.random()*.3);return {x:px,y:py,r:r,vy:vt*.3,vt:vt,ph:Math.random()*6.28,
-    wf:r>3.5?.07+Math.random()*.05:.02+Math.random()*.03,wa:r>3.5?.25+r*.06:.05+Math.random()*.08,age:0};}
-  function drawBub(c,px,py,r,fa,ph){if(fa<=0)return;
-    if(r<2.2){c.fillStyle='rgba(235,250,255,'+(fa*.55).toFixed(3)+')';c.beginPath();c.arc(px,py,r,0,6.283);c.fill();return;}
-    var sq=r>4.5?1-.13*Math.abs(Math.sin(ph*1.4)):1;c.save();c.translate(px,py);c.scale(1/sq*.98+.02,sq);
-    var g=c.createRadialGradient(-r*.25,-r*.3,r*.1,0,0,r);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.7,'rgba(220,245,255,'+(fa*.06).toFixed(3)+')');g.addColorStop(1,'rgba(235,252,255,'+(fa*.38).toFixed(3)+')');
-    c.fillStyle=g;c.beginPath();c.arc(0,0,r,0,6.283);c.fill();
-    c.strokeStyle='rgba(240,252,255,'+(fa*.45).toFixed(3)+')';c.lineWidth=Math.max(.6,r*.07);c.stroke();
-    c.fillStyle='rgba(255,255,255,'+(fa*.85).toFixed(3)+')';c.beginPath();c.ellipse(-r*.38,-r*.4,r*.2,r*.12,-.6,0,6.283);c.fill();
-    c.strokeStyle='rgba(255,255,255,'+(fa*.3).toFixed(3)+')';c.lineWidth=Math.max(.5,r*.05);c.beginPath();c.arc(0,0,r*.72,.3,1.25);c.stroke();c.restore();}
   // ---- 沖繩的海中生物（剪紙風剪影）：琉璃雀鯛群、小丑魚、綠蠵龜、鬼蝠魟、鯨鯊、螃蟹、寄居蟹 ----
   var crit=[];
   function seabedY(px){if(d<=SEA)return H+999;var sb=(d-SEA)/(1-SEA),e2=sb*sb*(3-2*sb),base=H-H*.14*e2,fr=.008,phs=4.8;return base+Math.sin(px*fr+phs)*10+Math.sin(px*fr*3.1+phs)*3;}
@@ -1238,16 +1251,15 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       // 海底的青海波（較清楚）
       x.save();x.globalAlpha=.10*e2;x.fillStyle=x.createPattern(seig,'repeat');x.fillRect(0,H-H*.22*e2,W,H);x.restore();}
     updCrit(t);
-    // 水中氣泡：大多從海底幾個「冒泡點」成串上升；大泡泡上升快、會左右搖擺並微微變扁，小泡泡慢且幾乎直線；越往上越大
-    if(d>B-.03){if(!vents.length||Math.random()<.002){vents=[];for(var vi=0;vi<(W<700?2:4);vi++)vents.push(W*(.08+Math.random()*.84));}
-      var rate=(W<700?.22:.38)*(.55+.45*u);
-      if(Math.random()<rate){var fromV=Math.random()<.7,vx=fromV?vents[Math.floor(Math.random()*vents.length)]+(Math.random()-.5)*14:Math.random()*W;
-        var br=fromV?.8+Math.pow(Math.random(),3)*5:1+Math.pow(Math.random(),2.2)*9;amb.push(mkBub(vx,H+br+4,br));}
-      if(Math.random()<.008){var cx2=Math.random()*W;for(var q2=0;q2<6+Math.floor(Math.random()*8);q2++)amb.push(mkBub(cx2+(Math.random()-.5)*20,H+8+q2*(6+Math.random()*14),.8+Math.pow(Math.random(),2)*6));}}
-    for(var bi=amb.length-1;bi>=0;bi--){var Bb=amb[bi];Bb.age++;
-      Bb.vy+=(Bb.vt-Bb.vy)*.04;Bb.y-=Bb.vy;Bb.ph+=Bb.wf;Bb.x+=Math.sin(Bb.ph)*Bb.wa;Bb.r*=1.0006;
+    // 水中氣泡：海底幾個冒泡點持續冒出細小氣泡串；偶爾一顆大氣泡晃動上升
+    if(d>B-.03){if(!vents.length||Math.random()<.002){vents=[];for(var vi=0;vi<(W<700?2:4);vi++)vents.push({x:W*(.06+Math.random()*.88),p:Math.random()*6.28});}
+      var rate=(W<700?.3:.5)*(.5+.5*u);
+      if(Math.random()<rate){var V=vents[Math.floor(Math.random()*vents.length)];V.p+=.6;var br=bubbleSize(W<700?.8:1);if(Math.random()<.75)br=Math.min(br,2.2);
+        var nb=newBubble(V.x+Math.sin(V.p)*6+(Math.random()-.5)*6,H+br+4,br);nb.a=.9;amb.push(nb);}
+      if(Math.random()<.004){var bigR=6+Math.random()*8,nb2=newBubble(Math.random()*W,H+20,bigR);nb2.a=.9;amb.push(nb2);}}
+    for(var bi=amb.length-1;bi>=0;bi--){var Bb=amb[bi];stepBubble(Bb,1);
       if(Bb.y<-30||d<A){amb.splice(bi,1);continue;}
-      var fa=Math.min(1,Bb.age/14)*Math.min(1,(Bb.y+30)/(H*.22));drawBub(x,Bb.x,Bb.y,Bb.r,fa,Bb.ph);}
+      drawBubble(x,Bb.x,Bb.y,Bb.r,Bb.a*Math.min(1,Bb.age/14)*Math.min(1,(Bb.y+30)/(H*.22))*(.75+.25*(1-u)),Bb.ph);}
     // 和紙纖維質感
     x.save();x.globalAlpha=.10;x.fillStyle=x.createPattern(washi,'repeat');x.fillRect(0,0,W,H);x.restore();
     x.restore();
@@ -1277,7 +1289,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   function place(){var a=rail.querySelector('a.top'),b=rail.querySelector('a[data-sec="map-sec"]');if(!a||!b)return;var R=rail.getBoundingClientRect(),A=a.getBoundingClientRect(),Bb=b.getBoundingClientRect();
     var horiz=getComputedStyle(rail).flexDirection==='row';
     var v=horiz?((A.right+Bb.left)/2-R.left)/R.width*100:((A.bottom+Bb.top)/2-R.top)/R.height*100;rail.style.setProperty('--sl',v.toFixed(2)+'%');}
-  function upd(){var m=document.documentElement.scrollHeight-innerHeight,d=m>0?Math.min(1,scrollY/m):0;
+  function upd(){var d=window.DIVE?DIVE.depth():0;
     var z=d<.10?0:Math.round(Math.pow((d-.10)/.90,1.15)*MAXD);dp.innerHTML=z===0?'<small>海面</small>0 m':'<small>水深</small>'+z+' m';
     dp.style.background=z===0?'rgba(51,166,184,.9)':'rgba('+Math.round(39-17*d)+','+Math.round(110-74*d)+','+Math.round(150-80*d)+',.9)';}
   place();upd();addEventListener('resize',place);addEventListener('scroll',upd,{passive:true});if(document.fonts)document.fonts.ready.then(place);
