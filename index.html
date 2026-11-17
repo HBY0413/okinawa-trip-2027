@@ -386,10 +386,22 @@
 
   header .fids{max-width:none!important}
   .fids-car{border-top:1px dashed rgba(255,255,255,.18)}
-  .fids-car .c-st{color:rgba(255,255,255,.75);justify-content:flex-end}
+  .fids-car .c-st{color:rgba(255,255,255,.75)}
   @media (max-width:700px){.fids-car .c-dep::before{content:'取車 '}.fids-car .c-arr::before{content:'還車 '}.fids-car .c-date br{display:none}}
 
   @media (max-width:700px){.fids-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 76px!important}.fids-car .c-date{white-space:nowrap}}
+
+  /* 班次表對齊：每格垂直置中、同一欄左緣對齊、代碼與中文同一基準 */
+  .fids-row > span{display:flex;align-items:center;min-height:44px}
+  .fids-row .c-date{flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.35}
+  .fids-row .c-route{gap:6px;white-space:nowrap}
+  .fids-row .c-st{justify-content:flex-start}
+  .fids-head > span{min-height:0}
+  .seg14{line-height:1;display:inline-block;transform:translateY(-1px)}
+  .dot-car{background:#9ca3af!important;box-shadow:none!important;animation:none!important}
+  @media (max-width:700px){.fids-row > span{min-height:0}.fids-row .c-date{flex-direction:row;align-items:baseline;justify-content:flex-start;gap:6px}.fids-row .c-st{justify-content:flex-end}}
+
+  @media (max-width:700px){.fids-row .c-air{display:none!important}.fids-title .en{display:none}.fids-now{white-space:nowrap}}
 </style>
 </head>
 <body>
@@ -403,7 +415,7 @@
     <h1>🌊 沖繩自駕 7 天 6 夜</h1>
     <p>那霸 → 國頭（山原）連住 3 晚 → 讀谷・北谷 → 那霸</p>
     <div class="fids" role="table" aria-label="航班資訊">
-      <div class="fids-title"><span>✈ 航班・租車 FLIGHTS &amp; CAR</span><span class="fids-now">沖繩時間 <span class="fids-clock" id="fidsClock" aria-hidden="true"></span></span></div>
+      <div class="fids-title"><span>✈ 航班・租車 <span class="en">FLIGHTS &amp; CAR</span></span><span class="fids-now">沖繩時間 <span class="fids-clock" id="fidsClock" aria-hidden="true"></span></span></div>
       <div class="fids-row fids-head" role="row">
         <span class="c-date">日期</span><span class="c-air">航空</span><span class="c-no">班次</span><span class="c-route">航線</span>
         <span class="c-dep">起飛／取車</span><span class="c-arr">抵達／還車</span><span class="c-st-h">狀態</span></div>
@@ -416,9 +428,9 @@
         <span class="c-route"><b class="seg14">OKA</b> → <b class="seg14">TPE</b> T1</span>
         <span class="c-dep"><span class="seg"><span class="ghost">88:88</span><span class="on">08<span class="colon">:</span>15</span></span></span><span class="c-arr"><span class="seg"><span class="ghost">88:88</span><span class="on">08<span class="colon">:</span>55</span></span></span><span class="c-st"><i class="dot"></i>已出票</span></div>
       <div class="fids-row fids-car" role="row">
-        <span class="c-date">2/1（一）–<br>2/6（六）</span><span class="c-air">🚗 租車</span><span class="c-no seg14 dim">-----</span>
+        <span class="c-date">2/1 – 2/6<small>租車</small></span><span class="c-air">🚗 租車</span><span class="c-no seg14 dim">-----</span>
         <span class="c-route">取車 <b class="seg14">OKA</b> → 還車 那霸</span>
-        <span class="c-dep"><span class="seg"><span class="ghost">88:88</span><span class="on">13<span class="colon">:</span>30</span></span></span><span class="c-arr"><span class="seg"><span class="ghost">88:88</span><span class="on">17<span class="colon">:</span>00</span></span></span><span class="c-st c-car-st">6 天</span></div>
+        <span class="c-dep"><span class="seg"><span class="ghost">88:88</span><span class="on">13<span class="colon">:</span>30</span></span></span><span class="c-arr"><span class="seg"><span class="ghost">88:88</span><span class="on">17<span class="colon">:</span>00</span></span></span><span class="c-st c-car-st"><i class="dot dot-car"></i>6 天</span></div>
     </div>
   </div>
 </header>
