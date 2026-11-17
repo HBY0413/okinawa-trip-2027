@@ -454,6 +454,24 @@
   /* 下潛背景：海灘 → 穿過水面 → 水中 → 海底 */
   #under{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
   #ocean,#bgphoto{transform-origin:50% 62%;will-change:transform}
+
+  /* 導引軸＝海平面刻度：⬆ 在海面上，往下是越來越深的海水 */
+  nav.rail{background:linear-gradient(180deg,#f6f3ec 0,#f6f3ec var(--sl,13%),#d9eef3 calc(var(--sl,13%) + 1px),#bfe0ea 45%,#a3cfde 100%)!important;overflow:visible}
+  nav.rail .sea-line{position:absolute;left:0;right:0;top:var(--sl,13%);height:10px;transform:translateY(-5px);pointer-events:none;z-index:1;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M0 5 Q5 0 10 5 T20 5' fill='none' stroke='%2333a6b8' stroke-width='1.6'/%3E%3C/svg%3E") repeat-x 0 0/20px 10px;animation:seaShift 2.4s linear infinite}
+  @keyframes seaShift{to{background-position:20px 0}}
+  nav.rail .depth{position:absolute;right:0;top:100%;transform:translateY(8px);white-space:nowrap;font-size:14px;font-weight:600;
+    color:#fff;background:rgba(22,72,118,.85);padding:2px 10px;border-radius:999px;pointer-events:none;transition:background .4s}
+  nav.rail .ticks{position:absolute;left:3px;top:var(--sl,13%);bottom:18px;width:5px;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(22,72,118,.35) 0 1px,transparent 1px 14px)}
+  @media (max-width:900px){
+    nav.rail{background:linear-gradient(90deg,#f6f3ec 0,#f6f3ec var(--sl,10%),#d9eef3 calc(var(--sl,10%) + 1px),#bfe0ea 45%,#a3cfde 100%)!important}
+    nav.rail .sea-line{left:var(--sl,10%);right:auto;top:0;bottom:0;width:10px;height:auto;transform:translateX(-5px);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20'%3E%3Cpath d='M5 0 Q0 5 5 10 T5 20' fill='none' stroke='%2333a6b8' stroke-width='1.6'/%3E%3C/svg%3E");background-size:10px 20px;background-repeat:repeat-y;animation:none}
+    nav.rail .ticks{display:none}
+    nav.rail .depth{top:auto;bottom:100%;right:auto;left:50%;transform:translate(-50%,-6px)}
+  }
+  @media (prefers-reduced-motion:reduce){nav.rail .sea-line{animation:none}}
 </style>
 </head>
 <body>
@@ -902,13 +920,23 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     var uw=ctx.createBiquadFilter();uw.type='lowpass';uw.frequency.value=18000;uw.Q.value=.6;   // 潛入水中時聲音變悶
     var uwGain=ctx.createGain();uwGain.gain.value=1;master.connect(uw);uw.connect(uwGain);uwGain.connect(ctx.destination);
     var fx=ctx.createGain();fx.gain.value=.9;fx.connect(ctx.destination);
-    ctx._depth=function(d){var k=Math.max(0,Math.min(1,(d-.06)/.16));var n=ctx.currentTime;
-      uw.frequency.setTargetAtTime(18000*Math.pow(420/18000,k),n,.25);uwGain.gain.setTargetAtTime(1-.45*k,n,.25);};
+    // 水中低頻環境聲（越深越明顯）
+    var amb=ctx.createBufferSource();amb.buffer=buf;amb.loop=true;amb.playbackRate.value=.5;var ambF=ctx.createBiquadFilter();ambF.type='lowpass';ambF.frequency.value=160;ambF.Q.value=1.2;
+    var ambG=ctx.createGain();ambG.gain.value=0;amb.connect(ambF);ambF.connect(ambG);ambG.connect(fx);amb.start();
+    // 咕嚕的回音（越深越空）
+    var dl=ctx.createDelay(1);dl.delayTime.value=.18;var fb=ctx.createGain();fb.gain.value=0;var wet=ctx.createGain();wet.gain.value=0;
+    var lp2=ctx.createBiquadFilter();lp2.type='lowpass';lp2.frequency.value=900;dl.connect(lp2);lp2.connect(fb);fb.connect(dl);lp2.connect(wet);wet.connect(ctx.destination);
+    ctx._bus=ctx.createGain();ctx._bus.connect(fx);ctx._bus.connect(dl);
+    ctx._d=0;
+    ctx._depth=function(d){ctx._d=d;var k=Math.max(0,Math.min(1,(d-.04)/.12));var n=ctx.currentTime;var deep=Math.max(0,(d-.1)/.9);
+      uw.frequency.setTargetAtTime(18000*Math.pow(300/18000,k),n,.3);uwGain.gain.setTargetAtTime(Math.pow(1-k,1.6),n,.35);   // 海浪聲：海面清楚 → 水中聽不到
+      ambG.gain.setTargetAtTime(k*(.10+.22*deep),n,.6);ambF.frequency.setTargetAtTime(200-110*deep,n,.6);
+      fb.gain.setTargetAtTime(.15+.4*deep,n,.4);wet.gain.setTargetAtTime(k*(.15+.45*deep),n,.4);dl.delayTime.setTargetAtTime(.14+.16*deep,n,.4);};
     // 咕嚕：一顆氣泡＝快速往上滑的正弦音
-    ctx._blub=function(when,size){var o=ctx.createOscillator(),g=ctx.createGain(),f0=180+Math.random()*420*(1.2-size),dur=.05+.09*size+Math.random()*.04;
+    ctx._blub=function(when,size){var deep=Math.max(0,(ctx._d-.1)/.9);var o=ctx.createOscillator(),g=ctx.createGain(),f0=(180+Math.random()*420*(1.2-size))*(1-.55*deep),dur=(.05+.09*size+Math.random()*.04)*(1+.9*deep);
       o.type='sine';o.frequency.setValueAtTime(f0,when);o.frequency.exponentialRampToValueAtTime(f0*(1.8+Math.random()*1.4),when+dur);
       g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(.16+.18*size,when+.008);g.gain.exponentialRampToValueAtTime(.001,when+dur);
-      o.connect(g);g.connect(fx);o.start(when);o.stop(when+dur+.02);};
+      o.connect(g);g.connect(ctx._bus);o.start(when);o.stop(when+dur+.02);};
     function layer(freq,q,vol){var src=ctx.createBufferSource();src.buffer=buf;src.loop=true;src.playbackRate.value=.9+Math.random()*.2;
       var f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=freq;f.Q.value=q;
       var g=ctx.createGain();g.gain.value=0;src.connect(f);f.connect(g);g.connect(master);src.start();return {g:g,f:f,vol:vol};}
@@ -935,9 +963,12 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   // 給下潛效果用：深度改變水中悶聲、往下捲時咕嚕咕嚕
   var lastGlug=0;
   window.SND={isOn:function(){return on&&!!ctx},depth:function(d){if(on&&ctx&&ctx._depth)ctx._depth(d);},
-    glug:function(amount){if(!on||!ctx||!ctx._blub)return;var now=ctx.currentTime;if(now-lastGlug<.18)return;lastGlug=now;
-      var n=2+Math.floor(Math.random()*3)+Math.min(3,Math.floor(amount/120)),t=now+.01;
-      for(var i=0;i<n;i++){ctx._blub(t,Math.random());t+=.05+Math.random()*.11;}}};
+    glug:function(speed){if(!on||!ctx||!ctx._blub)return;var now=ctx.currentTime;   // speed：每秒捲動幾 px
+      var deep=Math.max(0,(ctx._d-.1)/.9),gap=Math.max(.05,.55-speed/2200);if(now-lastGlug<gap)return;lastGlug=now;
+      var n=1+Math.min(6,Math.floor(speed/450)+(Math.random()<.5?1:0)),sp=Math.max(.028,.17-speed/9000)*(1+.8*deep),t=now+.01;
+      for(var i=0;i<n;i++){ctx._blub(t,Math.random());t+=sp*(.6+Math.random()*.8);}}};
+  // 在水中時偶爾自己冒幾顆泡泡聲
+  (function idle(){setTimeout(function(){if(on&&ctx&&ctx._blub&&ctx._d>.12&&!document.hidden){var t=ctx.currentTime+.02,n=1+Math.floor(Math.random()*3);for(var i=0;i<n;i++){ctx._blub(t,Math.random()*.6);t+=.08+Math.random()*.2;}}idle();},2500+Math.random()*5000);})();
   var userOff=false;
   function manual(){toggle();userOff=!on;}
   btn2.addEventListener('click',manual);
@@ -987,9 +1018,10 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       var r=(mobile?1:1.2)+Math.pow(Math.random(),2.2)*(mobile?8:11);
       bub.push({x:px,y:H+r+Math.random()*40,r:r,vy:.7+Math.random()*3.8+r*.08,ph:Math.random()*6.28,wob:.4+Math.random()*1.1,a:.55,life:0});}
   }
-  function onScroll(){var y=scrollY,d=y-lastY;lastY=y;vel=vel*.6+d*.4;
+  var lastST=performance.now();
+  function onScroll(){var y=scrollY,d=y-lastY;lastY=y;var nowT=performance.now(),dtS=Math.max(8,nowT-lastST);lastST=nowT;var spd=Math.abs(d)/dtS*1000;vel=vel*.6+d*.4;
     var max=document.documentElement.scrollHeight-H;depth=max>0?Math.min(1,y/max):0;if(window.SND)SND.depth(depth);
-    if(d>0){spawn(Math.min(mobile?4:6,Math.ceil(d/(mobile?30:20))));if(window.SND&&depth>.06)SND.glug(d);}
+    if(d>0){spawn(Math.min(mobile?4:6,Math.ceil(d/(mobile?30:20))));if(window.SND&&depth>.06)SND.glug(spd);}
     else if(d<-2){breath=Math.min(1,breath+Math.min(.5,-d/250));}
     if(!running){running=true;requestAnimationFrame(loop);}
   }
@@ -1113,6 +1145,21 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
 (function(){function fit(){document.querySelectorAll('#days .day > .note').forEach(function(n){var sb=n.parentElement.querySelector('.stop-body');if(!sb)return;
   n.style.marginLeft='0px';var off=sb.getBoundingClientRect().left-n.getBoundingClientRect().left;n.style.setProperty('margin-left',Math.max(0,off)+'px','important');});}
   fit();addEventListener('resize',fit);if(document.fonts)document.fonts.ready.then(fit);})();
+</script>
+<script>
+// 海平面刻度：海平面畫在 ⬆ 與「地圖」之間，下方顯示目前水深
+(function(){var rail=document.querySelector('nav.rail');if(!rail)return;
+  var sl=document.createElement('span');sl.className='sea-line';var tk=document.createElement('span');tk.className='ticks';var dp=document.createElement('span');dp.className='depth';
+  rail.appendChild(tk);rail.appendChild(sl);rail.appendChild(dp);
+  var MAXD=30;
+  function place(){var a=rail.querySelector('a.top'),b=rail.querySelector('a[data-sec="map-sec"]');if(!a||!b)return;var R=rail.getBoundingClientRect(),A=a.getBoundingClientRect(),Bb=b.getBoundingClientRect();
+    var horiz=getComputedStyle(rail).flexDirection==='row';
+    var v=horiz?((A.right+Bb.left)/2-R.left)/R.width*100:((A.bottom+Bb.top)/2-R.top)/R.height*100;rail.style.setProperty('--sl',v.toFixed(2)+'%');}
+  function upd(){var m=document.documentElement.scrollHeight-innerHeight,d=m>0?Math.min(1,scrollY/m):0;
+    var z=d<.10?0:Math.round(Math.pow((d-.10)/.90,1.15)*MAXD);dp.textContent=z===0?'🌊 海面 0 m':'🫧 水深 '+z+' m';
+    dp.style.background=z===0?'rgba(51,166,184,.9)':'rgba('+Math.round(39-17*d)+','+Math.round(110-74*d)+','+Math.round(150-80*d)+',.9)';}
+  place();upd();addEventListener('resize',place);addEventListener('scroll',upd,{passive:true});if(document.fonts)document.fonts.ready.then(place);
+})();
 </script>
 </body>
 </html>
