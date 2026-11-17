@@ -480,6 +480,12 @@
     filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));animation:kinpaku 8s ease-in-out infinite}
   @keyframes kinpaku{50%{background-position:100% 0}}
   @media (prefers-reduced-motion:reduce){footer{animation:none}}
+
+  /* 水深標籤：與導引列置中、上方留呼吸空間；寬度不超過導引列 */
+  nav.rail .depth{left:50%!important;right:auto!important;transform:translate(-50%,16px)!important;display:flex;flex-direction:column;align-items:center;
+    line-height:1.25;padding:7px 4px;min-width:48px;border-radius:999px;text-align:center;box-shadow:0 2px 8px rgba(0,30,60,.25)}
+  nav.rail .depth small{font-size:14px;font-weight:300;opacity:.85}
+  @media (max-width:900px){nav.rail .depth{flex-direction:row;gap:6px;padding:3px 12px;transform:translate(-50%,-14px)!important;top:auto;bottom:100%}}
 </style>
 </head>
 <body>
@@ -1229,7 +1235,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     var horiz=getComputedStyle(rail).flexDirection==='row';
     var v=horiz?((A.right+Bb.left)/2-R.left)/R.width*100:((A.bottom+Bb.top)/2-R.top)/R.height*100;rail.style.setProperty('--sl',v.toFixed(2)+'%');}
   function upd(){var m=document.documentElement.scrollHeight-innerHeight,d=m>0?Math.min(1,scrollY/m):0;
-    var z=d<.10?0:Math.round(Math.pow((d-.10)/.90,1.15)*MAXD);dp.textContent=z===0?'🌊 海面 0 m':'🫧 水深 '+z+' m';
+    var z=d<.10?0:Math.round(Math.pow((d-.10)/.90,1.15)*MAXD);dp.innerHTML=z===0?'<small>海面</small>0 m':'<small>水深</small>'+z+' m';
     dp.style.background=z===0?'rgba(51,166,184,.9)':'rgba('+Math.round(39-17*d)+','+Math.round(110-74*d)+','+Math.round(150-80*d)+',.9)';}
   place();upd();addEventListener('resize',place);addEventListener('scroll',upd,{passive:true});if(document.fonts)document.fonts.ready.then(place);
 })();
