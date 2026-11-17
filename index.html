@@ -402,7 +402,7 @@
   var W,H,dpr,t=0,last=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   function size(){dpr=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);}
   addEventListener('resize',size);size();
-  var photoState='loading',img=new Image();img.onload=function(){photoState='ok';};img.onerror=function(){photoState='fail';document.getElementById('bgphoto').style.display='none';if(reduce)requestAnimationFrame(draw);};img.src='bg-okinawa.jpg';
+  var cover=null,photoState='loading',img=new Image();img.onload=function(){photoState='ok';if(reduce)requestAnimationFrame(draw);};img.onerror=function(){photoState='fail';document.getElementById('bgphoto').style.display='none';if(reduce)requestAnimationFrame(draw);};img.src='bg-okinawa.jpg';
   var glints=[];for(var i=0;i<90;i++)glints.push({x:Math.random(),y:Math.random(),p:Math.random()*6.28,s:.6+Math.random()*1.6});
   function island(cx,base,w,h,col){
     x.fillStyle=col;x.beginPath();x.moveTo(cx-w/2,base);
@@ -413,17 +413,44 @@
     if(!reduce)requestAnimationFrame(draw);
     if(ts-last<33&&!reduce)return; last=ts; t=ts/1000;
     var hz=H*0.34;
-    if(photoState!=='fail'){ // 背景是 Gemini 生成的照片（#bgphoto），這裡只疊上淡淡的動態浪花與波光
-      x.clearRect(0,0,W,H);
-      var ph=H*0.5;
-      glints.forEach(function(p){var y=ph+(H-ph)*(.08+p.y*.55),a=.5+.5*Math.sin(t*2.2+p.p);
-        x.fillStyle='rgba(255,255,255,'+(a*.45).toFixed(2)+')';x.fillRect(((p.x*W+t*6*p.s)%W),y,1.5+p.s*1.6*(y/H),1);});
-      [{y:.83,a:5,l:280,s:.5,f:.06,k:.16,w:1},{y:.90,a:7,l:360,s:.75,f:.08,k:.22,w:1.4},{y:.97,a:9,l:460,s:1,f:.11,k:.3,w:1.8}].forEach(function(L,i){
-        var base=H*L.y; function wy(px){return base+Math.sin(px/L.l*6.28+t*L.s+i)*L.a+Math.sin(px/(L.l*.43)*6.28-t*L.s*1.3)*L.a*.35;}
-        x.beginPath();x.moveTo(0,H);for(var px=0;px<=W+10;px+=10)x.lineTo(px,wy(px));x.lineTo(W,H);x.closePath();
-        x.fillStyle='rgba(235,252,250,'+L.f+')';x.fill();
-        x.beginPath();for(var qx=0;qx<=W+10;qx+=10){if(qx===0)x.moveTo(qx,wy(qx));else x.lineTo(qx,wy(qx));}
-        x.strokeStyle='rgba(255,255,255,'+L.k+')';x.lineWidth=L.w;x.stroke();});
+    if(photoState!=='fail'){ // 背景：Gemini 照片，海面部分做波動扭曲，再疊上浪花與拍岸白浪
+      if(photoState!=='ok'){x.clearRect(0,0,W,H);return;}
+      if(!cover||cover.w!==W||cover.h!==H){ // 依螢幕大小預先算好鋪滿的照片
+        var iw=img.naturalWidth,ih=img.naturalHeight,sc=Math.max(W/iw,H/ih),dw=iw*sc,dh=ih*sc,ox=(W-dw)/2,oy=(H-dh)*0.55;
+        var cv=document.createElement('canvas');cv.width=W*dpr;cv.height=H*dpr;var cx=cv.getContext('2d');cx.setTransform(dpr,0,0,dpr,0,0);cx.drawImage(img,ox,oy,dw,dh);
+        cover={c:cv,w:W,h:H,hz:oy+dh*0.497};
+      }
+      var hzY=Math.max(0,cover.hz);
+      // 天空與沙灘以上：原樣
+      x.drawImage(cover.c,0,0,W*dpr,hzY*dpr,0,0,W,hzY);
+      // 海面：一條條橫向位移，越近岸波動越大
+      var step=3;
+      for(var y=hzY;y<H;y+=step){
+        var d=(y-hzY)/(H-hzY), amp=0.6+d*d*9;
+        var off=Math.sin(y*0.045-t*1.6)*amp+Math.sin(y*0.013+t*0.9)*amp*0.6;
+        x.drawImage(cover.c,0,y*dpr,W*dpr,step*dpr,off-16,y,W+32,step);
+      }
+      // 波光
+      glints.forEach(function(p){var y=hzY+(H-hzY)*(.06+p.y*.75),a=.5+.5*Math.sin(t*2.4+p.p);
+        x.fillStyle='rgba(255,255,255,'+(a*.75).toFixed(2)+')';x.fillRect(((p.x*W+t*7*p.s)%W),y,2+p.s*2.4*((y-hzY)/(H-hzY)),1.2);});
+      // 推進中的浪頭（白色浪花線）
+      function wy(L,i,px,base){return base+Math.sin(px/L.l*6.28+t*L.s+i)*L.a+Math.sin(px/(L.l*.43)*6.28-t*L.s*1.3)*L.a*.4;}
+      [{y:.70,a:4,l:300,s:.55,f:.05,k:.22,w:1.2},{y:.78,a:6,l:360,s:.7,f:.07,k:.32,w:1.8},{y:.86,a:8,l:420,s:.9,f:.09,k:.42,w:2.4},{y:.93,a:10,l:500,s:1.1,f:.12,k:.55,w:3}].forEach(function(L,i){
+        var base=hzY+(H-hzY)*((L.y-.5)/.5);
+        x.beginPath();x.moveTo(0,H);for(var px=0;px<=W+10;px+=8)x.lineTo(px,wy(L,i,px,base));x.lineTo(W,H);x.closePath();
+        x.fillStyle='rgba(225,250,248,'+L.f+')';x.fill();
+        x.beginPath();for(var qx=0;qx<=W+10;qx+=8){var qy=wy(L,i,qx,base);if(qx===0)x.moveTo(qx,qy);else x.lineTo(qx,qy);}
+        x.shadowColor='rgba(255,255,255,.8)';x.shadowBlur=6;x.strokeStyle='rgba(255,255,255,'+L.k+')';x.lineWidth=L.w;x.stroke();x.shadowBlur=0;});
+      // 拍岸白浪：每 7 秒一次從下往上湧，再慢慢退去（開聲音時與浪聲同步）
+      var cyc=(window.__waveT!==undefined?(t-window.__waveT):(t%7))/ (window.__waveDur||7);
+      if(cyc>=0&&cyc<1){
+        var push=cyc<.4?Math.sin(cyc/.4*Math.PI/2):Math.cos((cyc-.4)/.6*Math.PI/2);
+        var top=H-(H-hzY)*0.32*push, alpha=.55*push;
+        var gg=x.createLinearGradient(0,top-10,0,H);gg.addColorStop(0,'rgba(255,255,255,'+alpha.toFixed(2)+')');gg.addColorStop(.25,'rgba(240,253,252,'+(alpha*.5).toFixed(2)+')');gg.addColorStop(1,'rgba(220,248,246,'+(alpha*.25).toFixed(2)+')');
+        x.beginPath();x.moveTo(0,H);
+        for(var sx3=0;sx3<=W+10;sx3+=8){x.lineTo(sx3,top+Math.sin(sx3/90+t*2)*6+Math.sin(sx3/37-t*3)*3);}
+        x.lineTo(W,H);x.closePath();x.fillStyle=gg;x.fill();
+      }
       return;
     }
     // 天空
@@ -478,7 +505,7 @@
       var g=ctx.createGain();g.gain.value=0;src.connect(f);f.connect(g);g.connect(master);src.start();return {g:g,f:f,vol:vol};}
     var rumble=layer(380,.7,.9), wash=layer(1400,.4,.55), hiss=layer(5200,.2,.25);
     function swell(){ if(!on)return;
-      var n=ctx.currentTime,dur=5.5+Math.random()*4,peak=.7+Math.random()*.3;
+      var n=ctx.currentTime,dur=5.5+Math.random()*4,peak=.7+Math.random()*.3; window.__waveT=performance.now()/1000+.3; window.__waveDur=dur;
       [rumble,wash,hiss].forEach(function(L,k){var p=L.g.gain;p.cancelScheduledValues(n);p.setValueAtTime(p.value,n);
         var rise=dur*(.35+k*.05);p.linearRampToValueAtTime(L.vol*peak,n+rise);p.exponentialRampToValueAtTime(Math.max(.02,L.vol*.12),n+dur);
         L.f.frequency.setTargetAtTime((k===0?380:k===1?1400:5200)*(1+peak*.4),n,rise/2);L.f.frequency.setTargetAtTime(k===0?300:k===1?900:3200,n+rise,dur/3);});
@@ -490,7 +517,7 @@
       if(!ctx)build();
       on=!on;
       if(on){ctx.resume();master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.8);ctx._swell();}
-      else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);}
+      else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);window.__waveT=undefined;window.__waveDur=7;}
       btn.classList.toggle('on',on);btn.setAttribute('aria-pressed',on);btn.textContent=on?'🔊 海浪聲：開':'🔈 海浪聲';
     }catch(e){btn.textContent='此瀏覽器無法播放聲音';}
   });
