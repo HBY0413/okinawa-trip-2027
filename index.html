@@ -1029,20 +1029,20 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
 (function(){
   var btn2=document.getElementById('soundBtn2'),btn=btn2,ctx=null,master=null,on=false,timer=null;
   function build(){
-    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    ctx=new (window.AudioContext||window.webkitAudioContext)();var OUT=ctx.createGain();OUT.gain.value=1;OUT.connect(ctx.destination);ctx._out=OUT;   // 總出口：離開網頁時瞬間靜音
     var len=ctx.sampleRate*4,buf=ctx.createBuffer(2,len,ctx.sampleRate);
     for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch),b0=0,b1=0,b2=0;
       for(var i=0;i<len;i++){var w=Math.random()*2-1;b0=.997*b0+w*.029;b1=.985*b1+w*.032;b2=.95*b2+w*.048;d[i]=(b0+b1+b2+w*.12)*.5;}}
     master=ctx.createGain();master.gain.value=0;
     var uw=ctx.createBiquadFilter();uw.type='lowpass';uw.frequency.value=18000;uw.Q.value=.6;   // 潛入水中時聲音變悶
-    var uwGain=ctx.createGain();uwGain.gain.value=1;master.connect(uw);uw.connect(uwGain);uwGain.connect(ctx.destination);
-    var fx=ctx.createGain();fx.gain.value=.9;fx.connect(ctx.destination);
+    var uwGain=ctx.createGain();uwGain.gain.value=1;master.connect(uw);uw.connect(uwGain);uwGain.connect(OUT);
+    var fx=ctx.createGain();fx.gain.value=.9;fx.connect(OUT);
     // 水中低頻環境聲（越深越明顯）
     var amb=ctx.createBufferSource();amb.buffer=buf;amb.loop=true;amb.playbackRate.value=.5;var ambF=ctx.createBiquadFilter();ambF.type='lowpass';ambF.frequency.value=160;ambF.Q.value=1.2;
     var ambG=ctx.createGain();ambG.gain.value=0;amb.connect(ambF);ambF.connect(ambG);ambG.connect(fx);amb.start();
     // 咕嚕的回音（越深越空）
     var dl=ctx.createDelay(1);dl.delayTime.value=.18;var fb=ctx.createGain();fb.gain.value=0;var wet=ctx.createGain();wet.gain.value=0;
-    var lp2=ctx.createBiquadFilter();lp2.type='lowpass';lp2.frequency.value=900;dl.connect(lp2);lp2.connect(fb);fb.connect(dl);lp2.connect(wet);wet.connect(ctx.destination);
+    var lp2=ctx.createBiquadFilter();lp2.type='lowpass';lp2.frequency.value=900;dl.connect(lp2);lp2.connect(fb);fb.connect(dl);lp2.connect(wet);wet.connect(OUT);
     ctx._bus=ctx.createGain();ctx._bus.connect(fx);ctx._bus.connect(dl);
     ctx._d=0;
     // 燕鷗（沖繩常見的紅燕鷗、黑枕燕鷗）：沙啞的「キィーアッ」「キッキッ」叫聲，從左右遠近隨機傳來
@@ -1119,7 +1119,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   var iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),needRebuild=false;
   var toast=document.createElement('div');toast.id='sndToast';toast.textContent='🔈 點一下畫面，恢復海浪聲';document.body.appendChild(toast);
   function showToast(v){toast.classList.toggle('show',!!v);}
-  function startFlow(){clearTimeout(timer);master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(0,ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.5);ctx._swell();
+  function startFlow(){clearTimeout(timer);try{ctx._out.gain.cancelScheduledValues(ctx.currentTime);ctx._out.gain.setValueAtTime(1,ctx.currentTime);}catch(e){}master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(0,ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.5);ctx._swell();
     if(ctx._depth&&window.DIVE)ctx._depth(DIVE.depth());}
   function rebuild(){try{clearTimeout(timer);ctx&&ctx.close&&ctx.close();}catch(e){}ctx=null;build();try{ctx.resume();}catch(e){}startFlow();needRebuild=false;showToast(false);}
   function revive(fromGesture){if(!ctx||!on)return;
@@ -1127,8 +1127,14 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     if(ctx.state==='running'&&!needRebuild){return;}
     var p=ctx.resume();var check=function(){if(ctx.state==='running'&&!needRebuild){startFlow();showToast(false);}else showToast(true);};
     if(p&&p.then)p.then(check).catch(function(){showToast(true);});else check();}
+  // 要離開網頁前先把總出口瞬間關到 0、停掉排程，再暫停音訊，避免 iPhone 切 App 時發出「嗚」的怪聲
+  function hush(){if(!ctx)return;clearTimeout(timer);try{var n=ctx.currentTime;ctx._out.gain.cancelScheduledValues(n);ctx._out.gain.setValueAtTime(0,n);}catch(e){}
+    if(on&&iOS)needRebuild=true;setTimeout(function(){try{ctx&&ctx.state==='running'&&ctx.suspend();}catch(e){}},40);}
+  document.addEventListener('pointerdown',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;
+    var h=a.getAttribute('href')||'';if(iOS&&(a.target==='_blank'||/^https?:/.test(h)&&a.host!==location.host)){hush();setTimeout(function(){if(!document.hidden&&on)revive(false);},1500);}},true);
+  addEventListener('pagehide',hush);addEventListener('blur',function(){if(iOS)hush();});
   document.addEventListener('visibilitychange',function(){if(!ctx)return;
-    if(document.hidden){clearTimeout(timer);if(iOS&&on)needRebuild=true;try{ctx.suspend();}catch(e){}}
+    if(document.hidden){hush();}
     else if(on){revive(false);}});
   addEventListener('pageshow',function(e){if(e.persisted&&on){if(iOS)needRebuild=true;revive(false);}});
   addEventListener('focus',function(){if(ctx&&on&&ctx.state!=='running')revive(false);});
