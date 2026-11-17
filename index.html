@@ -1085,8 +1085,8 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     mobile=matchMedia('(max-width:700px)').matches;}
   size();addEventListener('resize',size);
   function contentEdge(){var m=document.querySelector('main');if(!m)return null;var r=m.getBoundingClientRect();return [r.left+14,r.right-14];}
-  function spawn(n){for(var i=0;i<n;i++){var px=Math.random()*W,r=bubbleSize(mobile?.8:1),B0=newBubble(px,H+r+Math.random()*30,r);B0.a=.9;bub.push(B0);
-      if(r<2&&Math.random()<.5){for(var k=1;k<3+Math.floor(Math.random()*5);k++){var rr=bubbleSize(.6),T=newBubble(px+(Math.random()-.5)*4,H+r+k*(5+Math.random()*9)+30,Math.min(rr,2));T.a=.85;T.ph=B0.ph+k*.4;bub.push(T);}}}}
+  function spawn(n){for(var i=0;i<n;i++){var px=Math.random()*W,r=bubbleSize(mobile?.8:1),B0=newBubble(px,H+r+Math.random()*30,r);B0.a=.38;bub.push(B0);
+      if(r<2&&Math.random()<.5){for(var k=1;k<3+Math.floor(Math.random()*5);k++){var rr=bubbleSize(.6),T=newBubble(px+(Math.random()-.5)*4,H+r+k*(5+Math.random()*9)+30,Math.min(rr,2));T.a=.32;T.ph=B0.ph+k*.4;bub.push(T);}}}}
   var lastST=performance.now();
   function onScroll(){var y=scrollY,d=y-lastY;lastY=y;var nowT=performance.now(),dtS=Math.max(8,nowT-lastST);lastST=nowT;var spd=Math.abs(d)/dtS*1000;vel=vel*.6+d*.4;
     depth=window.DIVE?DIVE.depth():0;if(window.SND)SND.depth(depth);
