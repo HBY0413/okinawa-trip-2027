@@ -427,6 +427,17 @@
   /* ===== 字型：標題 Zen Maru Gothic（圓體）、內文 粉圓 Huninn ===== */
   body,button,input,select,textarea{font-family:'Huninn',-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
   h1,main section h2,#days > h2,.day-head h3{font-family:'Zen Maru Gothic','Huninn',-apple-system,"PingFang TC",sans-serif!important;font-weight:700!important;letter-spacing:.02em}
+
+  /* 導引軸：目前所在區塊用深色半透明膠囊標示 */
+  nav.rail{position:fixed}
+  .rail-hl{position:absolute;left:0;top:0;border-radius:999px;background:rgba(51,51,51,.16);
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.22),0 1px 0 rgba(255,255,255,.5);pointer-events:none;z-index:0;opacity:0;
+    transition:transform .35s cubic-bezier(.3,.7,.3,1),width .35s,height .35s,opacity .25s}
+  .rail a{position:relative;z-index:1}
+  .rail a.on,.rail a[data-sec^="d"].on{background:transparent!important;font-weight:800}
+  .rail a[data-sec^="d"].on{color:rgb(var(--dc))!important}
+  .rail a.on:not([data-sec^="d"]){color:var(--sea-d)!important}
+  @media (prefers-reduced-motion:reduce){.rail-hl{transition:none}}
 </style>
 </head>
 <body>
@@ -705,10 +716,16 @@
     var h=document.documentElement; var max=h.scrollHeight-h.clientHeight;
     bar.style.width=(max>0?h.scrollTop/max*100:0)+'%';
     var cur=-1, y=window.innerHeight*0.35;
-    secs.forEach(function(el,i){ if(el && el.getBoundingClientRect().top<=y) cur=i; });
+    secs.forEach(function(el,i){ if(!el)return; var r=el.getBoundingClientRect(); if(r.top<=y && r.bottom>90) cur=i; });
     links.forEach(function(a,i){a.classList.toggle('on',i===cur);});
+    moveHL(cur>=0?links[cur]:null);
   }
-  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  // 目前所在區塊：深色半透明膠囊滑到對應項目
+  var rail=document.querySelector('nav.rail'),hl=document.createElement('span');hl.className='rail-hl';rail.insertBefore(hl,rail.firstChild);
+  function moveHL(a){if(!a){hl.style.opacity=0;return;}var R=rail.getBoundingClientRect(),A=a.getBoundingClientRect();
+    hl.style.opacity=1;hl.style.width=(A.width+12)+'px';hl.style.height=(A.height)+'px';
+    hl.style.transform='translate('+(A.left-R.left-6+rail.scrollLeft)+'px,'+(A.top-R.top+rail.scrollTop)+'px)';}
+  window.addEventListener('scroll',onScroll,{passive:true}); window.addEventListener('resize',onScroll); onScroll();
 })();
 </script>
 <script>
