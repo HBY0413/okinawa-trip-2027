@@ -402,6 +402,25 @@
   @media (max-width:700px){.fids-row > span{min-height:0}.fids-row .c-date{flex-direction:row;align-items:baseline;justify-content:flex-start;gap:6px}.fids-row .c-st{justify-content:flex-end}}
 
   @media (max-width:700px){.fids-row .c-air{display:none!important}.fids-title .en{display:none}.fids-now{white-space:nowrap}}
+
+  /* ===== 字級系統：主標 18／副標 16／內文 14 ===== */
+  :root{--t-h:#1f2a30;--t-sub:#4a5560;--t-body:#5f6b72}
+  /* 內文 14：最細 */
+  body,main p,main li,main td,.stop-note,.eat-note,.muted,.note,.tips li,.must li,.card .muted,.tag,.btn,.cnt,.stay,.day-filter button,
+  header p,.fids-row,.fids-row small,.c-air,.c-date,.c-route,.c-st{font-size:14px!important;font-weight:300!important}
+  main section:not(#stay):not(#map-sec) :is(p,li,.stop-note,.eat-note,.muted,.note,.card .muted){color:var(--t-body)!important}
+  /* 副標 16：中等粗、淡淡深灰 */
+  .stop-name,.eat-name,details.eat summary,.card h3,main h3:not(.day-head h3),.must li > b,.tips li > b,.note b,.stay-tbl b,#stay td b,
+  .time,nav:not(.rail) .wrap a,header .fids .c-air{font-size:16px!important;font-weight:600!important}
+  main section:not(#stay):not(#map-sec) :is(.stop-name,.eat-name,.card h3,h3,.must li > b,.tips li > b,.note b){color:var(--t-sub)!important}
+  /* 主標 18：最粗、最深（非純黑） */
+  main section h2,.day-head h3,#days > h2{font-size:18px!important;font-weight:800!important}
+  main section:not(#stay):not(#map-sec) h2:not(#days > h2),.day-head h3{color:var(--t-h)!important}
+  #stay td b{color:#fff!important}
+  /* 粗體強調在內文中保持內文大小 */
+  main p b,.stop-note b,.muted b{font-size:inherit!important;font-weight:600!important}
+  .btn,.day-filter button,.stay,.tag{font-weight:500!important}
+  .star{font-size:14px!important}
 </style>
 </head>
 <body>
