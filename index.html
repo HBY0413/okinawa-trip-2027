@@ -570,6 +570,10 @@
   footer .reintro{margin-top:14px;font-family:'Huninn',sans-serif}
   .reintro-top{position:absolute;left:16px;top:14px;z-index:3}
   @media (max-width:600px){.reintro-top{left:8px;top:8px;padding:4px 10px}header#top{padding-top:46px!important}}
+
+  #sndToast{position:fixed;left:50%;top:76px;transform:translate(-50%,-10px);z-index:60;background:rgba(51,51,51,.82);color:#fff;font-size:14px;
+    padding:8px 16px;border-radius:999px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  #sndToast.show{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
@@ -1076,8 +1080,8 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   }
   function toggle(){
     try{
-      if(!ctx)build();
-      on=!on;
+      if(!ctx||ctx.state==='closed'||(needRebuild&&!on))build();
+      on=!on;needRebuild=false;if(typeof showToast==='function')showToast(false);
       window.WAVES.audio=on;
       if(on){ctx.resume();master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.8);ctx._swell();}
       else{clearTimeout(timer);master.gain.setTargetAtTime(0,ctx.currentTime,.4);}
@@ -1097,7 +1101,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   // 在水中時偶爾自己冒幾顆泡泡聲
   (function idle(){setTimeout(function(){if(on&&ctx&&ctx._blub&&ctx._d>.12&&!document.hidden){var t=ctx.currentTime+.02,n=1+Math.floor(Math.random()*3);for(var i=0;i<n;i++){ctx._blub(t,Math.random()*.6);t+=.08+Math.random()*.2;}}idle();},2500+Math.random()*5000);})();
   var userOff=false;
-  function manual(){toggle();userOff=!on;}
+  function manual(){if(on&&ctx&&(needRebuild||ctx.state!=='running')){rebuild();return;}toggle();userOff=!on;}
   window.SND.enable=function(){userOff=false;if(!on)toggle();};window.SND.disable=function(){userOff=true;if(on)toggle();};
   btn2.addEventListener('click',manual);
   // 瀏覽器不允許一打開就自動播放：在你第一次點擊／觸碰頁面任何地方時自動開始海浪聲（按按鈕關掉後就不會再自動開）
@@ -1110,16 +1114,26 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   function align(){var h=document.querySelector('header h1'),hd=document.getElementById('top');if(!h)return;
     if(!btn2.closest('header'))return;var hr=h.getBoundingClientRect(),tr=hd.getBoundingClientRect();btn2.style.top=(hr.top-tr.top+hr.height/2-btn2.offsetHeight/2)+'px';}
   align();addEventListener('resize',align);if(document.fonts)document.fonts.ready.then(align);
-  // 切到別的分頁／App 再回來：恢復聲音。有些瀏覽器（特別是 iPhone Safari）回來後不允許自動恢復，就在下一次點擊／觸碰時恢復
-  function revive(){if(!ctx||!on)return;var p=ctx.state!=='running'?ctx.resume():null;
-    var go=function(){if(ctx.state==='running'){clearTimeout(timer);master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.5);ctx._swell();
-      if(ctx._depth&&window.DIVE)ctx._depth(DIVE.depth());}};
-    if(p&&p.then)p.then(go).catch(function(){});else go();}
-  document.addEventListener('visibilitychange',function(){if(!ctx)return;if(document.hidden){clearTimeout(timer);ctx.suspend();}else if(on)revive();});
-  addEventListener('pageshow',function(){if(!document.hidden)revive();});
-  addEventListener('focus',function(){if(ctx&&on&&ctx.state!=='running')revive();});
-  ['pointerdown','touchend','keydown','click'].forEach(function(ev){document.addEventListener(ev,function(){if(ctx&&on&&ctx.state!=='running')revive();},true);});
-  if(window.AudioContext){/* iOS 來電、切 App 時狀態會變成 interrupted */}
+  // 切到別的分頁／App（例如去 Google 地圖）再回來：恢復聲音。
+  // iPhone／iPad（含 iOS 的 Chrome）切 App 後音訊常被系統中斷，就算 resume 也可能沒聲音 → 在下一次點擊時整個重建音訊
+  var iOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),needRebuild=false;
+  var toast=document.createElement('div');toast.id='sndToast';toast.textContent='🔈 點一下畫面，恢復海浪聲';document.body.appendChild(toast);
+  function showToast(v){toast.classList.toggle('show',!!v);}
+  function startFlow(){clearTimeout(timer);master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(0,ctx.currentTime);master.gain.setTargetAtTime(.55,ctx.currentTime,.5);ctx._swell();
+    if(ctx._depth&&window.DIVE)ctx._depth(DIVE.depth());}
+  function rebuild(){try{clearTimeout(timer);ctx&&ctx.close&&ctx.close();}catch(e){}ctx=null;build();try{ctx.resume();}catch(e){}startFlow();needRebuild=false;showToast(false);}
+  function revive(fromGesture){if(!ctx||!on)return;
+    if(fromGesture&&(needRebuild||ctx.state!=='running')){rebuild();return;}
+    if(ctx.state==='running'&&!needRebuild){return;}
+    var p=ctx.resume();var check=function(){if(ctx.state==='running'&&!needRebuild){startFlow();showToast(false);}else showToast(true);};
+    if(p&&p.then)p.then(check).catch(function(){showToast(true);});else check();}
+  document.addEventListener('visibilitychange',function(){if(!ctx)return;
+    if(document.hidden){clearTimeout(timer);if(iOS&&on)needRebuild=true;try{ctx.suspend();}catch(e){}}
+    else if(on){revive(false);}});
+  addEventListener('pageshow',function(e){if(e.persisted&&on){if(iOS)needRebuild=true;revive(false);}});
+  addEventListener('focus',function(){if(ctx&&on&&ctx.state!=='running')revive(false);});
+  ['pointerdown','touchend','click','keydown'].forEach(function(ev){document.addEventListener(ev,function(e){
+    if(e.target&&e.target.closest&&e.target.closest('#soundBtn2,#intro'))return;if(ctx&&on&&(needRebuild||ctx.state!=='running'))revive(true);},true);});
 })();
 </script>
 <script>
