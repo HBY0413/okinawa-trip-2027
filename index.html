@@ -450,12 +450,16 @@
   .stops li{padding-bottom:16px!important}
   .stop-body > .note,.stop-body > details.eat{margin-top:12px!important;margin-bottom:4px!important}
   @media (max-width:600px){#days .day{padding-bottom:18px!important}}
+
+  /* 下潛背景：海灘 → 穿過水面 → 水中 → 海底 */
+  #under{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
+  #ocean,#bgphoto{transform-origin:50% 62%;will-change:transform}
 </style>
 </head>
 <body>
 <div id="bgphoto" aria-hidden="true"></div>
 <canvas id="ocean" aria-hidden="true"></canvas>
-<div id="deep" aria-hidden="true"></div>
+<canvas id="under" aria-hidden="true"></canvas>
 <canvas id="dive" aria-hidden="true"></canvas>
 <canvas id="breath" aria-hidden="true"></canvas>
 
@@ -955,7 +959,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
 // ===== 捲動潛水：往下滑＝潛入水中冒泡泡；往上滑＝浮出水面、吸一口氣 =====
 (function(){
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  var deep=document.getElementById('deep'),bc=document.getElementById('breath'),bx=bc.getContext('2d'),c=document.getElementById('dive'),x=c.getContext('2d'),W,H,dpr,bub=[],lastY=scrollY,vel=0,breath=0,depth=0,running=false,lastT=0;
+  var bc=document.getElementById('breath'),bx=bc.getContext('2d'),c=document.getElementById('dive'),x=c.getContext('2d'),W,H,dpr,bub=[],lastY=scrollY,vel=0,breath=0,depth=0,running=false,lastT=0;
   var mobile=matchMedia('(max-width:700px)').matches;
   function size(){dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);bc.width=W*dpr;bc.height=Math.round(H*.45)*dpr;bx.setTransform(dpr,0,0,dpr,0,0);
     mobile=matchMedia('(max-width:700px)').matches;}
@@ -968,7 +972,7 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
       bub.push({x:px,y:H+r+Math.random()*40,r:r,vy:1.2+Math.random()*2.2+r*.18,ph:Math.random()*6.28,wob:.4+Math.random()*1.1,a:.55,life:0});}
   }
   function onScroll(){var y=scrollY,d=y-lastY;lastY=y;vel=vel*.6+d*.4;
-    var max=document.documentElement.scrollHeight-H;depth=max>0?Math.min(1,y/max):0;deep.style.opacity=(depth*.28).toFixed(3);
+    var max=document.documentElement.scrollHeight-H;depth=max>0?Math.min(1,y/max):0;
     if(d>0){spawn(Math.min(mobile?4:6,Math.ceil(d/(mobile?30:20))));}
     else if(d<-2){breath=Math.min(1,breath+Math.min(.5,-d/250));}
     if(!running){running=true;requestAnimationFrame(loop);}
@@ -996,6 +1000,90 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     if(bub.length||breath>0.01){requestAnimationFrame(loop);}else{running=false;lastT=0;x.clearRect(0,0,W,H);bx.clearRect(0,0,W,H);}
   }
 })();
+</script>
+<script>
+// ===== 下潛背景：往下捲，鏡頭從沙灘往海面靠近、穿過水面，進入水中，最後看到海底 =====
+(function(){
+  var cv=document.getElementById('under'),x=cv.getContext('2d'),oc=document.getElementById('ocean'),bp=document.getElementById('bgphoto');
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var W,H,S=1,d=0,dTarget=0,last=0,parts=[],grass=[],rocks=[];
+  function size(){W=innerWidth;H=innerHeight;S=Math.min(1.5,devicePixelRatio||1);cv.width=W*S;cv.height=H*S;x.setTransform(S,0,0,S,0,0);
+    parts=[];var n=W<700?40:80;for(var i=0;i<n;i++)parts.push({x:Math.random()*W,y:Math.random()*H,r:.6+Math.random()*1.8,v:.08+Math.random()*.25,p:Math.random()*6.28});
+    grass=[];var gn=Math.round(W/26);for(var j=0;j<gn;j++)grass.push({x:j*26+Math.random()*20,h:30+Math.random()*70,w:2+Math.random()*3,p:Math.random()*6.28,c:Math.random()});
+    rocks=[];for(var k=0;k<Math.max(3,Math.round(W/260));k++)rocks.push({x:Math.random()*W,w:60+Math.random()*120,h:18+Math.random()*34});}
+  size();addEventListener('resize',function(){size();draw(performance.now());});
+  function depthNow(){var m=document.documentElement.scrollHeight-innerHeight;return m>0?Math.min(1,Math.max(0,scrollY/m)):0;}
+  function lerp(a,b,t){return a+(b-a)*t}
+  function col(a,b,t,al){return 'rgba('+Math.round(lerp(a[0],b[0],t))+','+Math.round(lerp(a[1],b[1],t))+','+Math.round(lerp(a[2],b[2],t))+','+al+')'}
+  // 階段：0–0.10 鏡頭靠近海面；0.10–0.20 穿過水面；0.20 之後在水中，越往下越深；0.80 之後看到海底
+  var A=.10,B=.20,SEA=.80;
+  function camera(){var k=Math.min(1,d/B);var e=k*k*(3-2*k);
+    var tf='translateY('+(-e*H*.25).toFixed(1)+'px) scale('+(1+e*.72).toFixed(3)+')';oc.style.transform=tf;if(bp)bp.style.transform=tf;}
+  function draw(ts){var t=ts/1000;x.clearRect(0,0,W,H);camera();
+    if(d<=A){return;}
+    var u=Math.max(0,(d-B)/(1-B));           // 水中深度 0–1
+    var wl=d<B? H*(1-(d-A)/(B-A)) : -40;     // 水面線位置（從畫面底部往上掃）
+    x.save();
+    if(d<B){x.beginPath();x.moveTo(0,H);for(var px=0;px<=W;px+=8){x.lineTo(px,wl+Math.sin(px*.02+t*2.2)*7+Math.sin(px*.047-t*3.1)*3);}x.lineTo(W,H);x.closePath();x.clip();}
+    // 水色：淺藍綠 → 深藍
+    var g=x.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,col([70,190,215],[8,70,120],u,.97));g.addColorStop(1,col([10,110,160],[2,22,52],u,1));
+    x.fillStyle=g;x.fillRect(0,0,W,H);
+    // 從水面照下來的光束
+    var ra=.16*(1-u*.85);
+    if(ra>.01){x.globalCompositeOperation='lighter';
+      for(var i=0;i<7;i++){var cx=W*(.08+i*.14)+Math.sin(t*.25+i*1.7)*W*.03,sp=W*(.035+.02*Math.sin(i*2.1)),tilt=W*.12;
+        var rg=x.createLinearGradient(0,0,0,H*.95);rg.addColorStop(0,'rgba(220,250,255,'+(ra*(.6+.4*Math.sin(t*.7+i))).toFixed(3)+')');rg.addColorStop(1,'rgba(220,250,255,0)');
+        x.fillStyle=rg;x.beginPath();x.moveTo(cx-sp*.4,0);x.lineTo(cx+sp*.4,0);x.lineTo(cx+tilt+sp*1.6,H*.95);x.lineTo(cx+tilt-sp*1.6,H*.95);x.closePath();x.fill();}
+      // 水面波光（從水下往上看）
+      var ca=.22*(1-u);if(ca>.01){x.strokeStyle='rgba(235,255,255,'+ca.toFixed(3)+')';x.lineWidth=1.2;
+        for(var r=0;r<6;r++){var yy=8+r*14;x.beginPath();for(var px2=0;px2<=W;px2+=10){var v=yy+Math.sin(px2*.03+t*1.6+r)*5+Math.sin(px2*.011-t*.9+r*2)*4;px2?x.lineTo(px2,v):x.moveTo(px2,v);}x.stroke();}}
+      x.globalCompositeOperation='source-over';}
+    // 水中漂浮的細小顆粒
+    x.fillStyle='rgba(230,250,255,'+(.25+.25*u).toFixed(2)+')';
+    for(var j=0;j<parts.length;j++){var P=parts[j];P.y-=P.v;P.x+=Math.sin(t*.6+P.p)*.15;if(P.y<-4){P.y=H+4;P.x=Math.random()*W;}
+      x.beginPath();x.arc(P.x,P.y,P.r,0,6.283);x.fill();}
+    // 海底：沙地、岩石、海草
+    if(d>SEA){var sb=(d-SEA)/(1-SEA),sh=H*.26*sb*sb*(3-2*sb),top=H-sh;
+      var sg=x.createLinearGradient(0,top-10,0,H);sg.addColorStop(0,'rgba(196,186,150,.92)');sg.addColorStop(1,'rgba(150,140,110,.98)');
+      x.fillStyle=sg;x.beginPath();x.moveTo(0,H);for(var px3=0;px3<=W;px3+=16){x.lineTo(px3,top+Math.sin(px3*.008)*14+Math.sin(px3*.023)*6);}x.lineTo(W,H);x.closePath();x.fill();
+      // 沙紋
+      x.strokeStyle='rgba(255,250,230,.18)';x.lineWidth=1.2;for(var q=1;q<5;q++){x.beginPath();var qy=top+sh*q/5;for(var px5=0;px5<=W;px5+=14){var vy=qy+Math.sin(px5*.03+q)*3;px5?x.lineTo(px5,vy):x.moveTo(px5,vy);}x.stroke();}
+      // 岩石與珊瑚
+      rocks.forEach(function(R,ri){var ry=top+Math.sin(R.x*.008)*14+sh*.3;
+        x.fillStyle='rgba(70,80,85,.95)';x.beginPath();x.ellipse(R.x,ry,R.w*.5*sb,R.h*sb,0,Math.PI,0);x.fill();
+        x.fillStyle='rgba(110,120,120,.6)';x.beginPath();x.ellipse(R.x-R.w*.12*sb,ry-R.h*.55*sb,R.w*.22*sb,R.h*.25*sb,0,0,6.283);x.fill();
+        var cc=['rgba(232,120,110,.9)','rgba(240,170,90,.9)','rgba(200,110,170,.85)'][ri%3];x.strokeStyle=cc;x.lineCap='round';
+        for(var br=0;br<5;br++){var bx0=R.x+(br-2)*R.w*.12*sb,bh=(20+((ri*7+br*13)%25))*sb,sw2=Math.sin(t*.9+br+ri)*3*sb;x.lineWidth=4*sb+1;
+          x.beginPath();x.moveTo(bx0,ry-R.h*sb*.8);x.quadraticCurveTo(bx0+sw2,ry-R.h*sb-bh*.5,bx0+sw2*1.5+(br-2)*4*sb,ry-R.h*sb-bh);x.stroke();
+          x.fillStyle=cc;x.beginPath();x.arc(bx0+sw2*1.5+(br-2)*4*sb,ry-R.h*sb-bh,3*sb+1,0,6.283);x.fill();}});
+      // 海草（有粗細的葉片）
+      grass.forEach(function(G){var gy=top+Math.sin(G.x*.008)*14+6,gh=G.h*sb;if(gh<4)return;
+        var sw=Math.sin(t*1.1+G.p)*gh*.28,bw=G.w*1.6;x.fillStyle=G.c<.5?'rgba(46,120,84,.92)':'rgba(70,140,92,.85)';
+        x.beginPath();x.moveTo(G.x-bw,gy);x.quadraticCurveTo(G.x-bw*.4+sw*.5,gy-gh*.55,G.x+sw,gy-gh);x.quadraticCurveTo(G.x+bw*.4+sw*.5,gy-gh*.55,G.x+bw,gy);x.closePath();x.fill();});
+      // 水中霧化，讓海底融進深藍
+      var fg=x.createLinearGradient(0,top-30,0,H);fg.addColorStop(0,'rgba(8,50,95,.45)');fg.addColorStop(1,'rgba(8,40,80,.15)');x.fillStyle=fg;x.fillRect(0,top-30,W,H-top+30);
+      // 海底的光斑
+      x.globalCompositeOperation='lighter';x.fillStyle='rgba(200,255,250,'+(.08*sb).toFixed(3)+')';
+      for(var c2=0;c2<14;c2++){var lx=(c2*W/14+Math.sin(t*.5+c2)*30)%W,ly=top+20+((c2*37)%Math.max(10,sh-20));x.beginPath();x.ellipse(lx,ly,26,6,0,0,6.283);x.fill();}
+      x.globalCompositeOperation='source-over';}
+    x.restore();
+    // 穿過水面時的白色水花線
+    if(d<B){x.strokeStyle='rgba(255,255,255,.85)';x.lineWidth=3;x.beginPath();for(var p4=0;p4<=W;p4+=8){var y4=wl+Math.sin(p4*.02+t*2.2)*7+Math.sin(p4*.047-t*3.1)*3;p4?x.lineTo(p4,y4):x.moveTo(p4,y4);}x.stroke();
+      x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=8;x.stroke();}
+  }
+  function loop(ts){requestAnimationFrame(loop);if(ts-last<33)return;last=ts;
+    dTarget=depthNow();d+= (dTarget-d)*.18;if(Math.abs(dTarget-d)<.0005)d=dTarget;draw(ts);}
+  if(reduce){addEventListener('scroll',function(){d=depthNow();draw(performance.now());},{passive:true});d=depthNow();draw(performance.now());}
+  else requestAnimationFrame(loop);
+  document.addEventListener('visibilitychange',function(){last=0;});
+})();
+</script>
+<script>
+// 每日卡片底部的備註：左緣對齊上面景點內容（與晚餐推薦膠囊等寬）
+(function(){function fit(){document.querySelectorAll('#days .day > .note').forEach(function(n){var sb=n.parentElement.querySelector('.stop-body');if(!sb)return;
+  n.style.marginLeft='0px';var off=sb.getBoundingClientRect().left-n.getBoundingClientRect().left;n.style.setProperty('margin-left',Math.max(0,off)+'px','important');});}
+  fit();addEventListener('resize',fit);if(document.fonts)document.fonts.ready.then(fit);})();
 </script>
 </body>
 </html>
