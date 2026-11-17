@@ -383,6 +383,13 @@
   main section > h2{margin-bottom:16px}
   main section > .note,main section > .grid + .note{margin-top:16px!important}
   .grid{gap:16px!important}
+
+  header .fids{max-width:none!important}
+  .fids-car{border-top:1px dashed rgba(255,255,255,.18)}
+  .fids-car .c-st{color:rgba(255,255,255,.75);justify-content:flex-end}
+  @media (max-width:700px){.fids-car .c-dep::before{content:'取車 '}.fids-car .c-arr::before{content:'還車 '}.fids-car .c-date br{display:none}}
+
+  @media (max-width:700px){.fids-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 76px!important}.fids-car .c-date{white-space:nowrap}}
 </style>
 </head>
 <body>
@@ -396,10 +403,10 @@
     <h1>🌊 沖繩自駕 7 天 6 夜</h1>
     <p>那霸 → 國頭（山原）連住 3 晚 → 讀谷・北谷 → 那霸</p>
     <div class="fids" role="table" aria-label="航班資訊">
-      <div class="fids-title"><span>✈ 航班 FLIGHTS</span><span class="fids-now">沖繩時間 <span class="fids-clock" id="fidsClock" aria-hidden="true"></span></span></div>
+      <div class="fids-title"><span>✈ 航班・租車 FLIGHTS &amp; CAR</span><span class="fids-now">沖繩時間 <span class="fids-clock" id="fidsClock" aria-hidden="true"></span></span></div>
       <div class="fids-row fids-head" role="row">
         <span class="c-date">日期</span><span class="c-air">航空</span><span class="c-no">班次</span><span class="c-route">航線</span>
-        <span class="c-dep">起飛</span><span class="c-arr">抵達</span><span class="c-st-h">狀態</span></div>
+        <span class="c-dep">起飛／取車</span><span class="c-arr">抵達／還車</span><span class="c-st-h">狀態</span></div>
       <div class="fids-row" role="row">
         <span class="c-date">2/1（一）<small>去程</small></span><span class="c-air">樂桃 Peach</span><span class="c-no seg14">MM922</span>
         <span class="c-route"><b class="seg14">TPE</b> T1 → <b class="seg14">OKA</b></span>
@@ -408,8 +415,11 @@
         <span class="c-date">2/7（日）<small>回程</small></span><span class="c-air">樂桃 Peach</span><span class="c-no seg14 dim">-----</span>
         <span class="c-route"><b class="seg14">OKA</b> → <b class="seg14">TPE</b> T1</span>
         <span class="c-dep"><span class="seg"><span class="ghost">88:88</span><span class="on">08<span class="colon">:</span>15</span></span></span><span class="c-arr"><span class="seg"><span class="ghost">88:88</span><span class="on">08<span class="colon">:</span>55</span></span></span><span class="c-st"><i class="dot"></i>已出票</span></div>
+      <div class="fids-row fids-car" role="row">
+        <span class="c-date">2/1（一）–<br>2/6（六）</span><span class="c-air">🚗 租車</span><span class="c-no seg14 dim">-----</span>
+        <span class="c-route">取車 <b class="seg14">OKA</b> → 還車 那霸</span>
+        <span class="c-dep"><span class="seg"><span class="ghost">88:88</span><span class="on">13<span class="colon">:</span>30</span></span></span><span class="c-arr"><span class="seg"><span class="ghost">88:88</span><span class="on">17<span class="colon">:</span>00</span></span></span><span class="c-st c-car-st">6 天</span></div>
     </div>
-    <p class="trip-meta">👥 3 人　｜　🚗 租車 2/1 下午 – 2/6 傍晚</p>
   </div>
 </header>
 
@@ -861,6 +871,15 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   var d0=0;function p(n){return (n<10?'0':'')+n}
   function upd(){var n=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));el.textContent=p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());}
   upd();setInterval(upd,1000);el.title='沖繩現在時間';
+})();
+</script>
+<script>
+(function(){var f=document.querySelector('header .fids');if(!f)return;
+  function fit(){var sec=document.querySelector('main section');if(!sec)return;f.style.marginLeft='0';f.style.marginRight='0';
+    var p=f.parentElement.getBoundingClientRect(),r=sec.getBoundingClientRect();
+    var cs=getComputedStyle(f.parentElement),pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0;
+    f.style.marginLeft=(r.left-p.left-pl)+'px';f.style.marginRight=(p.right-pr-r.right)+'px';}
+  fit();addEventListener('resize',fit);if(document.fonts)document.fonts.ready.then(fit);
 })();
 </script>
 </body>
