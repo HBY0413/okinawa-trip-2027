@@ -137,6 +137,23 @@
     padding:7px 16px;font-size:14px;font-weight:700;cursor:pointer;backdrop-filter:blur(4px);text-shadow:none}
   .hdr-snd:hover{background:rgba(255,255,255,.32)}
   .hdr-snd.on{background:var(--sun);border-color:var(--sun)}
+  /* 每天的代表色（色碼見下方），行程區塊用透明度漸層 */
+  #d1{--dc:217,103,78} .rail a[data-sec="d1"]{--dc:217,103,78} /* D1 珊瑚紅 #D9674E */
+  #d2{--dc:217,142,43} .rail a[data-sec="d2"]{--dc:217,142,43} /* D2 夕陽金 #D98E2B */
+  #d3{--dc:43,127,184} .rail a[data-sec="d3"]{--dc:43,127,184} /* D3 海洋藍 #2B7FB8 */
+  #d4{--dc:46,155,122} .rail a[data-sec="d4"]{--dc:46,155,122} /* D4 椰林綠 #2E9B7A */
+  #d5{--dc:126,107,181} .rail a[data-sec="d5"]{--dc:126,107,181} /* D5 暮色紫 #7E6BB5 */
+  #d6{--dc:201,91,142} .rail a[data-sec="d6"]{--dc:201,91,142} /* D6 扶桑花粉 #C95B8E */
+  #d7{--dc:85,122,140} .rail a[data-sec="d7"]{--dc:85,122,140} /* D7 礁岩藍灰 #557A8C */
+  .day{border-left:5px solid rgb(var(--dc,14,124,134))!important;
+    background:linear-gradient(100deg,rgba(var(--dc),.16) 0%,rgba(var(--dc),.07) 45%,rgba(var(--dc),.02) 100%)!important;
+    border-radius:0 14px 14px 0;padding:12px 14px 8px 16px!important}
+  .day .badge{background:rgb(var(--dc))}
+  .day .time{color:rgb(var(--dc))}
+  .day .stay{background:rgba(var(--dc),.14);color:rgb(var(--dc));border:1px solid rgba(var(--dc),.35);font-weight:600}
+  .day .stops li{border-bottom-color:rgba(var(--dc),.25)}
+  .rail a[data-sec^="d"]{color:rgb(var(--dc))}
+  .rail a[data-sec^="d"].on{background:rgb(var(--dc));color:#fff}
 </style>
 </head>
 <body>
@@ -320,8 +337,8 @@
 (function(){
   // [名稱, 緯度, 經度, 是否住宿]
   // 地圖路線直接讀取「每日行程」裡每個項目的座標，編號與行程一致
-  var CFG=[['D1','2/1 那霸','#e4572e'],['D2','2/2 那霸→名護','#f2994a'],['D3','2/3 美麗海・古宇利','#2d9cdb'],
-           ['D4','2/4 本部・今歸仁→北谷','#27ae60'],['D5','2/5 讀谷','#9b51e0'],['D6','2/6 北谷→南城→那霸','#eb5757'],['D7','2/7 回程','#4f4f4f']];
+  var CFG=[['D1','2/1 那霸','#D9674E'],['D2','2/2 那霸→名護','#D98E2B'],['D3','2/3 美麗海・古宇利','#2B7FB8'],
+           ['D4','2/4 本部・今歸仁→北谷','#2E9B7A'],['D5','2/5 讀谷','#7E6BB5'],['D6','2/6 北谷→南城→那霸','#C95B8E'],['D7','2/7 回程','#557A8C']];
   var DAYS=CFG.map(function(c){
     var el=document.getElementById(c[0].toLowerCase()), pts=[], n=0, endAdded=false;
     function hp(str){var q=str.split('|');return [q[0],+q[1],+q[2],1];}
@@ -375,7 +392,7 @@
     var b=document.createElement('button'); b.dataset.k=day.d;
     b.innerHTML='<span class="dot" style="background:'+day.c+'"></span>'+day.d+' '+day.t; b.onclick=function(){show(day.d);}; f.appendChild(b);
     var a=document.createElement('a'); a.className='btn route'; a.target='_blank'; a.rel='noopener'; a.href=day.url;
-    a.textContent='🚗 '+day.d+' Google Maps 開車路線'; nav.appendChild(a);
+    a.textContent='🚗 '+day.d+' Google Maps 開車路線'; a.style.background=day.c; a.style.borderColor=day.c; nav.appendChild(a);
   });
   show('all');
 })();
