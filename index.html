@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="vendor/fonts/zen-maru-gothic/700.css">
 <link rel="stylesheet" href="vendor/fonts/huninn/400.css">
+<link rel="stylesheet" href="vendor/fonts/m-plus-rounded-1c/800.css">
 <script>
 // 開啟網頁一律從標題開始：不沿用上次捲動位置、不跳到網址上的 #錨點
 (function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';}catch(e){}
@@ -538,30 +539,32 @@
 
   /* ===== 開場頁 ===== */
   html.intro-open,html.intro-open body{overflow:hidden}
-  #intro{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;
-    background:linear-gradient(180deg,#3b7fa8 0%,#2f6f98 55%,#285f88 100%);transition:opacity .9s ease,visibility .9s}
+  #intro{--accent:#E8B66B;position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;
+    background:linear-gradient(180deg,#2f5b86 0%,#25496f 50%,#1c3555 100%);transition:opacity .9s ease,visibility .9s;font-family:'Noto Sans TC','PingFang TC','Huninn',sans-serif}
   #intro.hide{opacity:0;visibility:hidden;pointer-events:none}
   #introCv{position:absolute;inset:0;width:100%;height:100%}
-  .intro-in{position:relative;padding:24px;max-width:860px;transform:translateY(0);transition:transform .9s ease}
+  .intro-sea{position:absolute;left:0;right:0;bottom:0;width:100%;height:15vh;min-height:90px;pointer-events:none}
+  .intro-in{position:relative;box-sizing:border-box;width:100%;padding:96px 28px 150px;display:flex;flex-direction:column;align-items:center;transition:transform .9s ease}
   #intro.hide .intro-in{transform:translateY(-24px)}
-  .intro-kicker{margin:0 0 18px;font-size:14px;font-weight:300;letter-spacing:.3em;color:rgba(248,244,230,.8)}
-  #intro h1{margin:0 0 28px;font-family:'Zen Maru Gothic','Huninn',sans-serif;font-weight:700;font-size:clamp(44px,13vw,112px);line-height:1.1;letter-spacing:.06em;
-    color:#fff;text-shadow:0 4px 24px rgba(0,30,60,.35)}
-  .intro-q{margin:0 0 26px;font-size:16px;line-height:1.8;color:rgba(255,255,255,.92)}
-  .intro-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-  .intro-btn{font:inherit;font-size:16px;font-weight:600;padding:12px 28px;border-radius:999px;cursor:pointer;color:#fff;
-    background:rgba(51,51,51,.45);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s,background .2s}
-  .intro-btn.on{background:var(--sun,#e8a04c);border-color:transparent;color:#fff}
-  .intro-btn:hover{transform:translateY(-2px)}
+  .intro-kicker{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:500;letter-spacing:.22em;color:rgba(255,255,255,.88)}
+  .intro-kicker .k2{letter-spacing:.32em}
+  .intro-wave{margin-top:30px}
+  #intro h1{margin:22px 0 0!important;padding:0!important;white-space:normal!important;font-family:'M PLUS Rounded 1c','Noto Sans TC',sans-serif!important;font-weight:800!important;font-size:clamp(46px,7vw,84px)!important;line-height:1.18;letter-spacing:.04em!important;
+    color:#fff;text-shadow:0 2px 18px rgba(8,28,48,.35)}
+  .intro-q{margin:28px 0 0;font-size:15px;line-height:1.85;color:rgba(255,255,255,.92)}
+  .intro-btns{margin-top:36px;width:100%;max-width:300px;display:flex;flex-direction:column;gap:12px}
+  .intro-btn{height:54px;border-radius:999px;font-family:'Noto Sans TC','PingFang TC',sans-serif;font-size:17px;font-weight:500;letter-spacing:.08em;
+    display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;color:#fff;border:1.5px solid rgba(255,255,255,.7);background:rgba(255,255,255,.04);transition:transform .15s,filter .2s}
+  .intro-btn.on{border:0;background:var(--accent);color:#102A43;font-weight:700;box-shadow:0 8px 24px rgba(8,28,48,.35)}
+  .intro-btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
   .intro-btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
-  .intro-note{margin:22px 0 0;font-size:14px;font-weight:300;color:rgba(255,255,255,.7)}
+  .intro-note{margin:22px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,.8)}
+  @media (max-height:700px){.intro-in{padding:40px 24px 90px}}
   @media (prefers-reduced-motion:reduce){#intro,.intro-in{transition:none}}
 
   /* 桌機：導引列上緣對齊班次表上緣，捲動後停在導覽列下方 */
   @media (min-width:901px){nav.rail{top:var(--railTop,50%)!important;transform:none!important}}
 
-  #intro h1 span{display:block;white-space:nowrap}
-  .intro-wave{font-size:clamp(36px,6vw,64px);line-height:1;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(0,30,60,.3))}
 
   /* 重新開啟開場頁的按鈕 */
   .reintro{font:inherit;font-size:14px;font-weight:600;color:#fff;background:rgba(51,51,51,.45);border:1px solid rgba(255,255,255,.3);
@@ -579,16 +582,17 @@
 <body>
 <div id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
   <canvas id="introCv" aria-hidden="true"></canvas>
+  <svg class="intro-sea" aria-hidden="true" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0 50 C 60 20, 120 20, 180 45 S 300 70, 400 30 L400 120 L0 120 Z" fill="rgba(255,255,255,.06)"/><path d="M0 75 C 70 50, 140 95, 220 78 S 340 50, 400 70 L400 120 L0 120 Z" fill="rgba(15,32,56,.55)"/><path d="M0 75 C 70 50, 140 95, 220 78 S 340 50, 400 70" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/></svg>
   <div class="intro-in">
-    <p class="intro-kicker">2027.2.1 — 2.7　那霸・山原・北谷</p>
-    <div class="intro-wave" aria-hidden="true">🌊</div>
-    <h1 id="introTitle"><span>沖縄ドライブ</span><span>7日間</span></h1>
+    <div class="intro-kicker"><div>2027.2.1 — 2.7</div><div class="k2">那霸・山原・北谷</div></div>
+    <svg class="intro-wave" role="img" aria-label="海浪" width="60" height="28" viewBox="0 0 60 28" xmlns="http://www.w3.org/2000/svg"><path d="M3 12 C 9 4, 15 4, 21 12 S 33 20, 39 12 S 51 4, 57 12" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/><path d="M3 22 C 9 14, 15 14, 21 22 S 33 30, 39 22 S 51 14, 57 22" fill="none" stroke="var(--accent)" stroke-opacity="0.55" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <h1 id="introTitle">沖縄ドライブ<br>7日間</h1>
     <p class="intro-q">這個網站有海浪、燕鷗與水中的聲音<br>要開啟聲音嗎？</p>
     <div class="intro-btns">
-      <button type="button" class="intro-btn on" data-snd="1">🔊 開聲音進入</button>
-      <button type="button" class="intro-btn" data-snd="0">🔈 靜音進入</button>
+      <button type="button" class="intro-btn on" data-snd="1"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"></path><path d="M15.5 9a4.2 4.2 0 0 1 0 6"></path><path d="M18.3 6.4a8 8 0 0 1 0 11.2"></path></svg>開聲音進入</button>
+      <button type="button" class="intro-btn" data-snd="0"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"></path><path d="M16 9.5l5 5"></path><path d="M21 9.5l-5 5"></path></svg>靜音進入</button>
     </div>
-    <p class="intro-note">之後可以隨時用導覽列左邊的「海浪聲」開關</p>
+    <p class="intro-note">之後可隨時從導覽列左側的「海浪聲」切換</p>
   </div>
 </div>
 <div id="bgphoto" aria-hidden="true"></div>
@@ -1394,19 +1398,11 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   var seig=(function(){var r=30,g=document.createElement('canvas');g.width=r*2;g.height=r;var c=g.getContext('2d');c.strokeStyle='rgba(255,255,255,1)';c.lineWidth=1.3;
     function fan(cx,cy){for(var k=1;k<=4;k++){c.beginPath();c.arc(cx,cy,r*k/4,Math.PI,0);c.stroke();}}fan(0,r);fan(r*2,r);fan(r,r*1.5);fan(r,r*.5);fan(-r,r*.5);fan(r*3,r*.5);return g;})();
   function size(){S=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*S;cv.height=H*S;x.setTransform(S,0,0,S,0,0);
-    gold=[];for(var i=0;i<(W<700?40:90);i++)gold.push({x:Math.random()*W,y:Math.random()*H,r:.8+Math.random()*1.8,p:Math.random()*6.28});}
+    gold=[];for(var i=0;i<(W<700?8:16);i++)gold.push({x:Math.random()*W,y:Math.random()*H,r:.8+Math.random()*1.8,p:Math.random()*6.28});}
   size();addEventListener('resize',size);
   function draw(ts){var t=ts/1000;x.clearRect(0,0,W,H);
     // 青海波
-    x.save();x.globalAlpha=.12;x.fillStyle=x.createPattern(seig,'repeat');x.translate((t*5)%60,0);x.fillRect(-60,0,W+120,H);x.restore();
-    // 微微的光帶
-    for(var r=0;r<5;r++){var cx=W*(.1+r*.21)+Math.sin(t*.2+r*1.9)*W*.015;var lg=x.createLinearGradient(0,0,0,H*.9);lg.addColorStop(0,'rgba(248,244,230,.07)');lg.addColorStop(1,'rgba(248,244,230,0)');
-      x.fillStyle=lg;x.beginPath();x.moveTo(cx-W*.015,0);x.lineTo(cx+W*.015,0);x.lineTo(cx+W*.1+W*.05,H*.9);x.lineTo(cx+W*.1-W*.05,H*.9);x.closePath();x.fill();}
-    // 流水紋＋觀世水小渦
-    x.lineCap='round';
-    for(var s2=0;s2<6;s2++){var yy=H*(.12+s2*.16),amp=8+s2%3*5,ph=t*(.3+s2*.04)+s2*2.1;x.strokeStyle='rgba(248,244,230,'+(.2-.015*s2).toFixed(3)+')';x.lineWidth=s2%2?1:1.6;x.beginPath();
-      for(var px=-20;px<=W+20;px+=10){var vy=yy+Math.sin(px*.008+ph)*amp+Math.sin(px*.02-ph*.6)*amp*.3;px===-20?x.moveTo(px,vy):x.lineTo(px,vy);}x.stroke();
-      var ex=W*(.15+((s2*37)%70)/100),ey=yy+Math.sin(ex*.008+ph)*amp;x.beginPath();for(var a=0;a<9.5;a+=.25){var rr=2+a*1.7;x.lineTo(ex+Math.cos(a+ph)*rr,ey+Math.sin(a+ph)*rr*.6);}x.stroke();}
+    x.save();x.globalAlpha=.10;x.fillStyle=x.createPattern(seig,'repeat');x.translate((t*4)%60,0);x.fillRect(-60,0,W+120,H);x.restore();
     // 金砂子
     for(var j=0;j<gold.length;j++){var G=gold[j];x.fillStyle='rgba(210,175,90,'+(.45+.3*Math.sin(t*1.1+G.p)).toFixed(2)+')';x.beginPath();x.arc(G.x+Math.sin(t*.4+G.p)*4,G.y,G.r,0,6.283);x.fill();}
     if(run&&!reduce)requestAnimationFrame(draw);}
@@ -1418,10 +1414,9 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     setTimeout(function(){run=false;el.style.display='none';},1000);}
   // 頁面裡可以自己重新打開開場頁
   window.showIntro=function(){el.style.display='';void el.offsetWidth;document.documentElement.classList.add('intro-open');el.classList.remove('hide');
-    if(!run){run=true;requestAnimationFrame(draw);}var b=el.querySelector('.intro-btn.on');setTimeout(function(){b&&b.focus({preventScroll:true});},300);};
+    if(!run){run=true;requestAnimationFrame(draw);}};
   document.querySelectorAll('[data-open-intro]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();showIntro();});});
   el.querySelectorAll('.intro-btn').forEach(function(b){b.addEventListener('click',function(){enter(b.dataset.snd==='1');});});
-  if(!skip)setTimeout(function(){var b=el.querySelector('.intro-btn.on');b&&b.focus({preventScroll:true});},300);
 })();
 </script>
 <script>
