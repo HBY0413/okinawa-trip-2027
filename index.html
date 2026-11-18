@@ -1409,6 +1409,13 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
   function draw(ts){var t=ts/1000;x.clearRect(0,0,W,H);
     // 青海波
     x.save();x.globalAlpha=.10;x.fillStyle=x.createPattern(seig,'repeat');x.translate((t*4)%60,0);x.fillRect(-60,0,W+120,H);x.restore();
+    // 陽光照進海裡：從水面斜斜往下的光帶，緩緩搖晃、明暗起伏
+    x.save();x.globalCompositeOperation='lighter';
+    for(var r=0;r<6;r++){var cx=W*(.06+r*.18)+Math.sin(t*.22+r*1.9)*W*.02,w0=W*.012+r%2*W*.006,w1=W*(.05+.02*Math.sin(r*2.3)),al=(.075+.035*Math.sin(t*.6+r*1.3)).toFixed(3);
+      var lg=x.createLinearGradient(0,0,0,H*.95);lg.addColorStop(0,'rgba(248,244,230,'+al+')');lg.addColorStop(.6,'rgba(248,244,230,'+(al*.35).toFixed(3)+')');lg.addColorStop(1,'rgba(248,244,230,0)');
+      x.fillStyle=lg;x.beginPath();x.moveTo(cx-w0,0);x.lineTo(cx+w0,0);x.lineTo(cx+W*.12+w1,H*.95);x.lineTo(cx+W*.12-w1,H*.95);x.closePath();x.fill();}
+    var tg=x.createRadialGradient(W*.5,-H*.1,0,W*.5,-H*.1,H*.7);tg.addColorStop(0,'rgba(255,250,235,.16)');tg.addColorStop(1,'rgba(255,250,235,0)');x.fillStyle=tg;x.fillRect(0,0,W,H*.6);
+    x.restore();
     // 金砂子
     for(var j=0;j<gold.length;j++){var G=gold[j];x.fillStyle='rgba(210,175,90,'+(.45+.3*Math.sin(t*1.1+G.p)).toFixed(2)+')';x.beginPath();x.arc(G.x+Math.sin(t*.4+G.p)*4,G.y,G.r,0,6.283);x.fill();}
     if(run&&!reduce)requestAnimationFrame(draw);}
