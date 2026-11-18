@@ -577,6 +577,11 @@
   #sndToast{position:fixed;left:50%;top:76px;transform:translate(-50%,-10px);z-index:60;background:rgba(51,51,51,.82);color:#fff;font-size:14px;
     padding:8px 16px;border-radius:999px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   #sndToast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* 方位標籤：落在本島的哪一區 */
+  .dir{display:inline-block;vertical-align:middle;margin-left:8px;padding:1px 9px;border-radius:999px;font-size:14px!important;font-weight:500!important;
+    line-height:1.5;color:#0b5f73;background:rgba(51,166,184,.13);border:1px solid rgba(51,166,184,.35);white-space:nowrap}
+  .dir::before{content:'🧭 ';font-size:12px}
 </style>
 </head>
 <body>
@@ -641,9 +646,9 @@
   <table>
     <thead><tr><th>晚</th><th>地點</th><th>飯店</th><th>2 月實際房價（三人一間）</th></tr></thead>
     <tbody>
-      <tr><td>2/1<br><span class="muted">1 晚</span></td><td>那霸</td><td><b>LACER OKINAWA NAHA MIEBASHI</b><div class="btns" data-q="LACER OKINAWA NAHA MIEBASHI 那覇"></div></td><td>NT$4,504<br><span class="muted">Booking.com，4 人房（4 張單人床），原價 NT$6,193，可免費取消</span></td></tr>
-      <tr><td>2/2–2/4<br><span class="muted">3 晚</span></td><td>國頭（山原・本島北部）</td><td><b>Okuma Private Beach &amp; Resort</b><br><span class="muted">Main Cottage，3 張單人床；有免費溫泉、私人海灘。備選：Wassa Wassa（大宜味小民宿，晚餐很有名）</span><div class="btns" data-q="オクマ プライベートビーチ &amp; リゾート" data-pid="ChIJ4fzmbkZD5DQRxlMrLXszPDs"></div><div class="btns" data-q="Wassa Wassa 大宜味" data-pid="ChIJYcSww_1a5DQRU_QefTTugLQ" data-label="備選"></div></td><td>含早 3 晚 ¥93,600（約 NT$18,700）<br><span class="muted">含早晚餐 3 晚約 ¥126,000–134,100（約 NT$25,200–26,800）；Jalan 早鳥 60 天方案 12/4 前訂</span></td></tr>
-      <tr><td>2/5–2/6<br><span class="muted">2 晚</span></td><td>那霸</td><td><b>Rihga Royal Gran Okinawa</b><br><span class="muted">2024 年翻新，2 張單人床＋1 張加床（不是沙發床）；旭橋單軌站旁，樓下有 Lawson，有停車場。備選：Creass Hotel 壺川（3 張單人床，有廚房和洗衣機，2 晚 NT$12,828）</span><div class="btns" data-q="リーガロイヤルグラン沖縄" data-pid="ChIJoeeIzZhp5TQRXYgdiJMHV9I"></div><div class="btns" data-q="Creass Hotel Tsubogawa Marche" data-pid="ChIJKwswr4Rp5TQRXuNnzKpIS4U" data-label="備選"></div></td><td>2 晚 NT$14,563<br><span class="muted">Booking.com，原價 NT$16,019，可免費取消</span></td></tr>
+      <tr><td>2/1<br><span class="muted">1 晚</span></td><td>那霸</td><td><b>LACER OKINAWA NAHA MIEBASHI</b><div class="btns" data-q="レイサー沖縄那覇美栄橋 LACER OKINAWA NAHA MIEBASHI" data-pid="ChIJ9cgrlUBp5TQRveDGeZQvGjw" data-web="https://hotels.creal.jp/brands/lacer/lacerokinawanahamiebashi"></div></td><td>NT$4,504<br><span class="muted">Booking.com，4 人房（4 張單人床），原價 NT$6,193，可免費取消</span></td></tr>
+      <tr><td>2/2–2/4<br><span class="muted">3 晚</span></td><td>國頭（山原・本島北部）</td><td><b>Okuma Private Beach &amp; Resort</b><br><span class="muted">Main Cottage，3 張單人床；有免費溫泉、私人海灘。備選：Wassa Wassa（大宜味小民宿，晚餐很有名）</span><div class="btns" data-q="Okuma Private Beach &amp; Resort" data-pid="ChIJ4fzmbkZD5DQRxlMrLXszPDs" data-web="https://okuma-resort.com/"></div><div class="btns" data-q="Wassa Wassa" data-pid="ChIJYcSww_1a5DQRU_QefTTugLQ" data-label="備選" data-web="https://wassa-okinawa.com/"></div></td><td>含早 3 晚 ¥93,600（約 NT$18,700）<br><span class="muted">含早晚餐 3 晚約 ¥126,000–134,100（約 NT$25,200–26,800）；Jalan 早鳥 60 天方案 12/4 前訂</span></td></tr>
+      <tr><td>2/5–2/6<br><span class="muted">2 晚</span></td><td>那霸</td><td><b>Rihga Royal Gran Okinawa</b><br><span class="muted">2024 年翻新，2 張單人床＋1 張加床（不是沙發床）；旭橋單軌站旁，樓下有 Lawson，有停車場。備選：Creass Hotel 壺川（3 張單人床，有廚房和洗衣機，2 晚 NT$12,828）</span><div class="btns" data-q="Rihga Royal Gran Okinawa" data-pid="ChIJoeeIzZhp5TQRXYgdiJMHV9I" data-web="https://www.rihgaroyalgran-okinawa.co.jp/"></div><div class="btns" data-q="Creass Hotel Tsubogawa Marche" data-pid="ChIJKwswr4Rp5TQRXuNnzKpIS4U" data-label="備選" data-web="https://marche-hotel.com/"></div></td><td>2 晚 NT$14,563<br><span class="muted">Booking.com，原價 NT$16,019，可免費取消</span></td></tr>
     </tbody>
   </table>
   <div class="muted" id="price-updated" style="margin:8px 0">房價最後更新：2026/11/17（每週六、日自動比對）</div>
@@ -666,7 +671,7 @@
     <ul class="stops">
       <li data-pt="26.2064,127.6466" data-kind="s"><div class="time">12:25</div><div class="stop-body"><div class="stop-name">抵達那霸機場・取車</div><div class="stop-note">入境後搭租車公司接駁車到營業所，大約 13:30–14:00 可以出發。</div></div></li>
       <li data-pt="26.2301,127.6803" data-kind="s"><div class="time">14:20</div><div class="stop-body"><div class="stop-name">泊港漁市（泊いゆまち）</div><div class="stop-note">機場開過來約 20 分鐘，有停車場。今天沒排午餐，可以在這裡買生魚片、海葡萄、海鮮丼墊墊肚子，市場旁的公園有座位。離飯店約 900 公尺。7:00–18:00。</div><div class="btns" data-q="泊いゆまち" data-pid="ChIJVVUV2ipq5TQRokk51vsSwDc"></div></div></li>
-      <li data-pt="26.2225,127.6825" data-kind="h"><div class="time">15:00</div><div class="stop-body"><div class="stop-name">入住 LACER（那霸）</div><div class="stop-note">漁市開過來約 3 分鐘。15:00 起可以入住，先放行李、休息一下。自助入住。<b>請先確認停車</b>：查不到飯店是否有停車場，沒有的話停附近有「最大料金（當日上限）」的投幣式停車場。</div><div class="btns" data-q="LACER OKINAWA NAHA MIEBASHI 那覇"></div></div></li>
+      <li data-pt="26.2225,127.6825" data-kind="h"><div class="time">15:00</div><div class="stop-body"><div class="stop-name">入住 LACER（那霸）</div><div class="stop-note">漁市開過來約 3 分鐘。15:00 起可以入住，先放行李、休息一下。自助入住。<b>請先確認停車</b>：查不到飯店是否有停車場，沒有的話停附近有「最大料金（當日上限）」的投幣式停車場。</div><div class="btns" data-q="レイサー沖縄那覇美栄橋 LACER OKINAWA NAHA MIEBASHI" data-pid="ChIJ9cgrlUBp5TQRveDGeZQvGjw" data-web="https://hotels.creal.jp/brands/lacer/lacerokinawanahamiebashi"></div></div></li>
       <li data-pt="26.1644,127.7707" data-kind="s"><div class="time">16:10</div><div class="stop-body"><div class="stop-name">南城 Yuinchi 猿人の湯（溫泉）</div><div class="stop-note">從飯店開過去約 40 分鐘。九州・沖繩溫泉排行第 1 名的源泉溫泉，大浴場看得到中城灣，泡湯放鬆約 1.5–2 小時，18:00 左右出發回那霸。單買泡湯約 2,000–2,200 日圓，6:30–23:00；有刺青不能入浴。二樓有免費休息區。</div><div class="btns" data-q="ユインチホテル南城 猿人の湯" data-pid="ChIJk9UegFZu5TQRUf7Gz8JA6WY"></div></div></li>
       <li data-pt="26.2225,127.6825" data-kind="h"><div class="time">18:40</div><div class="stop-body"><div class="stop-name">回 LACER（那霸）停車</div><div class="stop-note">南城開回那霸約 40 分鐘（傍晚可能塞車）。把車停好，走路去吃晚餐，晚上就不用再開車。</div></div></li>
       <li data-pt="26.2172,127.6896" data-kind="s"><div class="time">19:00</div><div class="stop-body"><div class="stop-name">晚餐：海渡 KAITO 国際通り</div><div class="stop-note">從飯店走路約 15 分鐘。沖繩料理居酒屋，Google 評分 4.9，18:00–24:00（週三公休）。推薦海葡萄、苦瓜炒蛋、和牛串。</div><div class="btns" data-q="海渡 KAITO OKINAWA 国際通り" data-pid="ChIJgchlrG1p5TQRsjzGvZxJIy8"></div>
@@ -731,14 +736,14 @@
 <section id="must">
   <h2>⭐ 一定要去</h2>
   <ol class="must">
-    <li><b>美麗海水族館</b>（D3）：鯨鯊、鬼蝠魟大水槽</li>
-    <li><b>古宇利島</b>（D3）：開車跨海大橋，翡翠綠的海</li>
-    <li><b>萬座毛</b>（D2）：象鼻海崖</li>
-    <li><b>北谷美國村</b>（D4–5）：吃飯、逛街、夕陽</li>
-    <li><b>國際通・牧志市場</b>（D1、D6）：伴手禮集中地</li>
-    <li><b>首里城</b>（D1）：琉球王國的王城，世界遺產</li>
-    <li><b>齋場御嶽</b>（D6）：世界遺產，琉球最神聖的地方</li>
-    <li><b>知念岬公園</b>（D6）：免費的太平洋海景</li>
+    <li><b>美麗海水族館</b>（D3）<span class="dir">北部・西側</span>：鯨鯊、鬼蝠魟大水槽</li>
+    <li><b>古宇利島</b>（D3）<span class="dir">北部・西側</span>：開車跨海大橋，翡翠綠的海</li>
+    <li><b>今歸仁城跡</b>（D3）<span class="dir">北部・西側</span>：世界遺產，綿延的城牆</li>
+    <li><b>山原（國頭）</b>（D2–D5）<span class="dir">北部・西側</span>：世界自然遺產的森林與私人海灘</li>
+    <li><b>萬座毛</b>（D2）<span class="dir">中部・西側</span>：象鼻海崖</li>
+    <li><b>北谷美國村</b>（D5）<span class="dir">中部・西側</span>：吃飯、逛街、夕陽</li>
+    <li><b>首里城</b>（D6）<span class="dir">南部・那霸</span>：琉球王國的王城，世界遺產</li>
+    <li><b>國際通・牧志市場</b>（D1、D6）<span class="dir">南部・那霸</span>：伴手禮集中地</li>
   </ol>
   <p class="muted">時間不夠可先刪：備瀨福木林道、Orion 啤酒工廠、殘波岬、陶藝村、座喜味城。</p>
 </section>
@@ -789,9 +794,10 @@
     var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) +
               (pid ? '&query_place_id=' + encodeURIComponent(pid) : '');
     var prefix = label ? label + '：' : '';
-    el.innerHTML =
-      '<a class="btn photo" target="_blank" rel="noopener" href="' + url + '">📷 ' + prefix + '看照片</a>' +
-      '<a class="btn" target="_blank" rel="noopener" href="' + url + '">📍 地圖</a>';
+    var first = el.dataset.web
+      ? '<a class="btn photo" target="_blank" rel="noopener" href="' + el.dataset.web + '">🌐 ' + prefix + '官網</a>'
+      : '<a class="btn photo" target="_blank" rel="noopener" href="' + url + '">📷 ' + prefix + '看照片</a>';
+    el.innerHTML = first + '<a class="btn" target="_blank" rel="noopener" href="' + url + '">📍 ' + prefix + '地圖</a>';
   });
 </script>
 <script src="vendor/leaflet/leaflet.js"></script>
@@ -1426,6 +1432,18 @@ window.WAVES={audio:false,setLeft:0,cur:{t0:-99,dur:7,size:.5},
     var minTop=nb<140?nb+16:16,t=Math.max(minTop,f.getBoundingClientRect().top);
     var maxTop=innerHeight-rail.offsetHeight-70;t=Math.min(t,Math.max(minTop,maxTop));rail.style.setProperty('--railTop',t+'px');}
   pos();addEventListener('scroll',pos,{passive:true});addEventListener('resize',pos);addEventListener('load',pos);if(document.fonts)document.fonts.ready.then(pos);
+})();
+</script>
+<script>
+// 每個景點依座標標出在沖繩本島的哪一區（北部／中部／南部）與東西側
+(function(){
+  var C=[[26.08,127.67],[26.20,127.72],[26.33,127.80],[26.45,127.86],[26.55,128.00],[26.65,128.10],[26.75,128.24],[26.87,128.30]];
+  function center(lat){for(var i=0;i<C.length-1;i++){if(lat<=C[i+1][0]){var t=Math.max(0,Math.min(1,(lat-C[i][0])/(C[i+1][0]-C[i][0])));return C[i][1]+(C[i+1][1]-C[i][1])*t;}}return C[C.length-1][1];}
+  function label(la,lo){var reg=la<26.27?'南部':la<26.52?'中部':'北部',dv=lo-center(la);
+    if(reg==='南部'&&la>26.19&&la<26.25&&lo>127.66&&lo<127.73)return '南部・那霸';
+    return reg+(dv<-.025?'・西側':dv>.025?'・東側':'');}
+  document.querySelectorAll('.stops li[data-pt]').forEach(function(li){var n=li.querySelector('.stop-name');if(!n||n.querySelector('.dir'))return;
+    var p=li.dataset.pt.split(',');var sp=document.createElement('span');sp.className='dir';sp.textContent=label(+p[0],+p[1]);n.appendChild(sp);});
 })();
 </script>
 </body>
